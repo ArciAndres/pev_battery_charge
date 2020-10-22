@@ -22,7 +22,7 @@ class EVChargeEnv(ChargeManagement):
 
                        seed=1515
                        ):
-        
+                
         self.n_pevs = n_pevs
         
         pevs = [PEV(soc_max=soc_max, xi=xi, p_min=p_min, p_max=p_max,

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from random import random
+from numpy.random import random
 from pev_battery_charge.utils.utils import createDict
 from ray.rllib.env.multi_agent_env import MultiAgentEnv, ENV_STATE
 
@@ -75,6 +75,8 @@ class ChargeManagement(MultiAgentEnv):
                 
     def distribute_load(self):
         
+        np.random.seed(self.seed)
+        
         # charge_samples = charge_duration_max/interval_length
         # total_samples_start = total_samples-charge_samples # Allowed start sample. Cannot start charging at very end of all, for example
         rate, proportional_dist = self.get_shrinking_rate()
@@ -89,7 +91,8 @@ class ChargeManagement(MultiAgentEnv):
                 
             else:
                 pev.t_start = np.floor(T_start[i]+(T_start[i+self.random_start_coeff]-T_start[i])*random())
-            
+                print(pev.t_start)
+                
             charge_samples = pev.charge_time_desired/self.interval_length
             pev.t_end = np.floor(pev.t_start + charge_samples*(1-self.charge_duration_tolerance*(1-random())))
             
@@ -148,12 +151,12 @@ class ChargeManagement(MultiAgentEnv):
         
         '''
         for pev in self.pevs:
-            pev.x = [t for t in range(int(pev.t_start), int(pev.t_end+1), 1)]
+            pev.X = [t for t in range(int(pev.t_start), int(pev.t_end+1), 1)]
             
             # m is the slope of the straight line. It is a measure of power in [kW]
-            pev.m = (pev.target_charge - pev.soc)/(pev.t_end - pev.t_start) / self.interval_length * 60
-            b = pev.soc - pev.m * pev.t_start
-            pev.y = [pev.m*x_ + b for x_ in pev.x]
+            pev.p_charge_rate = (pev.target_charge - pev.soc)/(pev.t_end - pev.t_start) / self.interval_length * 60
+            b = pev.soc - pev.p_charge_rate * pev.t_start
+            pev.Y = [pev.p_charge_rate*x_ + b for x_ in pev.X]
         
         self.update_df()
         
@@ -181,41 +184,43 @@ class ChargeManagement(MultiAgentEnv):
 #-----------------------------------------------------------
         
     def plot_common(self):
+        # Add grid and limits the X axis in corresponding samples. 
         plt.grid(True)
         plt.xlim([0, self.total_samples]) 
         
-    def plot_ax(self, subplot, plots, n_plots):
-        if subplot: 
-            if n_plots == 0:
-                plt.rcParams['figure.figsize'] = [10, 15]
-            n_plots=n_plots+1
-            plt.subplot(len(plots),1,n_plots)
-        else: 
-            plt.figure()
-        return n_plots
+    def plot_ax(self, plots, n_plots):
+        n_plots += 1
+        plt.subplot(len(plots),1,n_plots)
+        
         self.plot_common()
+        return n_plots
         
-    def plot_simulation(self, subplot=True, plots=[1,2,3]):
+    def plot_simulation(self, plots=[1,2,3]):
         
-        #fig = plt.figure()
+        figlabel = "Simulation PEV Charge"
+        if figlabel in plt.get_figlabels():    
+            plt.close(figlabel)
+        
+        plt.rcParams['figure.figsize'] = [10, 5*len(plots)]
+        plt.figure(figlabel)
+        
         n_plots = 0
         samples = [i for i in range(self.total_samples)]
         
-        self.plot_ax(subplot, plots, n_plots)
-        
         if 1 in plots:
             assert hasattr(self.pevs[0],'X') # X must be created. Check in first sample
+            n_plots = self.plot_ax(plots, n_plots)
             for pev in self.pevs:
-                plt.plot(self.X,self.Y)
+                plt.plot(pev.X,pev.Y)
         
         # Consumed power across the total time
         if 2 in plots:
             assert hasattr(self,'P_sim') 
-            self.plot_ax(subplot, plots, n_plots)
+            n_plots = self.plot_ax(plots, n_plots)
             plt.step(samples, self.P_sim)
         
         # Vehicles connected at the same time
         if 3 in plots:
             assert hasattr(self,'V_sim') 
-            self.plot_ax(subplot, plots, n_plots)
+            n_plots = self.plot_ax(plots, n_plots)
             plt.step(samples, self.V_sim)

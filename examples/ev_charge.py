@@ -4,13 +4,20 @@ Created on Tue Oct 20 19:46:43 2020
 
 @author: andre
 """
+#%matplotlib inline
 
+import numpy as np
 from pev_battery_charge.envs.EVChargeEnv import EVChargeEnv
+from pdb import set_trace
 
-ev = EVChargeEnv(20)
+ev = EVChargeEnv(20, seed=1515)
 
 #%%
 ev.compute_straight_charge()
+ev.compute_pev_plugin()
+#%%
+
+
+ev.plot_simulation(plots=[1])
 
 #%%
-ev.plot_simulation(subplot=True, plots=[1,2,3])
