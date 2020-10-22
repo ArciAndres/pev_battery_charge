@@ -51,7 +51,7 @@ class ChargeManagement(MultiAgentEnv):
                        
 
                  ):
-        
+
         # This distribution of connections will put the agents across the total time, in an ordered pseudo random fashion
         
         self.n_pevs = len(pevs)
@@ -67,8 +67,11 @@ class ChargeManagement(MultiAgentEnv):
         
         self.total_samples = int(total_time/interval_length)
         
-        
+        self.distribute_load()
 
+#----------------------------------------------------------------
+#----------------- Distribution in load -------------------------
+#----------------------------------------------------------------
                 
     def distribute_load(self):
         
@@ -93,7 +96,7 @@ class ChargeManagement(MultiAgentEnv):
             # SOC can be any number between 0 and soc_max
             pev.soc = round(pev.soc_max*random()*self.initial_charge_max*100)/100
         
-        self.df = pd.DataFrame([pev.__dict__ for pev in self.pevs])
+        self.update_df()
         
         
     def get_proportional_initial_dist(self):
@@ -129,21 +132,30 @@ class ChargeManagement(MultiAgentEnv):
         
         return shrink_rate, dist*shrink_rate
     
+    def update_df(self):
+        self.df = pd.DataFrame([pev.__dict__ for pev in self.pevs])
+#-----------------------------------------------------------
+#---------------- Compute greedy charge --------------------
+#-----------------------------------------------------------
+    
     def compute_straight_charge(self):
-        X, Y, M = [], [], []
-        for n in range(self.n_pevs):
-            item = self.df.iloc[n]
-            x = [t for t in range(int(item.t_start), int(item.t_end+1), 1)]
-            m = (item.target_charge - item.soc)/(item.t_end - item.t_start)
-            b = item.soc - m*item.t_start
-            y = [m*x_ +b for x_ in x]
-            M.append(m/5*60)
-            X.append(x)
-            Y.append(y)
+        '''
         
-        self.df['X'] = X
-        self.df['Y'] = Y        
-        self.df['p_charge_rate'] = M
+        Computes a greedy approach for charge, simply generating a straight line between
+        the initial and target SOC value. The mean charge power is the slope of the line, m.
+        The value of m should not exceed the p_max value. Otherwise, the charge goal not be
+        reached in any method.
+        
+        '''
+        for pev in self.pevs:
+            pev.x = [t for t in range(int(pev.t_start), int(pev.t_end+1), 1)]
+            
+            # m is the slope of the straight line. It is a measure of power in [kW]
+            pev.m = (pev.target_charge - pev.soc)/(pev.t_end - pev.t_start) / self.interval_length * 60
+            b = pev.soc - pev.m * pev.t_start
+            pev.y = [pev.m*x_ + b for x_ in pev.x]
+        
+        self.update_df()
         
     def compute_pev_plugin(self):
         P, V = [], []
@@ -163,12 +175,14 @@ class ChargeManagement(MultiAgentEnv):
             
         self.update_df()
         
+    
+#-----------------------------------------------------------
+#------------------- Plotting methods ----------------------
+#-----------------------------------------------------------
+        
     def plot_common(self):
         plt.grid(True)
         plt.xlim([0, self.total_samples]) 
-        
-    def update_df(self):
-        self.df = pd.DataFrame([pev.__dict__ for pev in self.pevs])
         
     def plot_ax(self, subplot, plots, n_plots):
         if subplot: 
@@ -183,9 +197,6 @@ class ChargeManagement(MultiAgentEnv):
         
     def plot_simulation(self, subplot=True, plots=[1,2,3]):
         
-        assert hasattr(self.pevs[0],'X') # X must be created. Check in first sample
-        
-        
         #fig = plt.figure()
         n_plots = 0
         samples = [i for i in range(self.total_samples)]
@@ -193,15 +204,18 @@ class ChargeManagement(MultiAgentEnv):
         self.plot_ax(subplot, plots, n_plots)
         
         if 1 in plots:
+            assert hasattr(self.pevs[0],'X') # X must be created. Check in first sample
             for pev in self.pevs:
-                plt.plot(pev.X,pev.Y)
+                plt.plot(self.X,self.Y)
         
         # Consumed power across the total time
         if 2 in plots:
+            assert hasattr(self,'P_sim') 
             self.plot_ax(subplot, plots, n_plots)
             plt.step(samples, self.P_sim)
         
         # Vehicles connected at the same time
         if 3 in plots:
+            assert hasattr(self,'V_sim') 
             self.plot_ax(subplot, plots, n_plots)
             plt.step(samples, self.V_sim)
