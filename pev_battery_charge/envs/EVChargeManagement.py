@@ -12,7 +12,8 @@ class PEV():
                        p_min=0, 
                        p_max=22,
                        soc=0,
-                       charge_time_desired=180
+                       charge_time_desired=180,
+                       target_charge=24
                        ):
         
         self.soc_max = soc_max
@@ -21,6 +22,7 @@ class PEV():
         self.p_max = p_max
         self.soc = soc
         self.charge_time_desired = charge_time_desired
+        self.target_charge = target_charge
         
 class ChargeStation():
     
@@ -75,7 +77,6 @@ class ChargeManagement(MultiAgentEnv):
         rate, proportional_dist = self.get_shrinking_rate()
         T_start = proportional_dist*self.total_samples
         
-        separation = 1
         for i , pev in enumerate(self.pevs):
             
             # Randomize the start time, from a point between it and the next random_start_coeff elements.
@@ -92,6 +93,7 @@ class ChargeManagement(MultiAgentEnv):
             # SOC can be any number between 0 and soc_max
             pev.soc = round(pev.soc_max*random()*self.initial_charge_max*100)/100
         
+        self.df = pd.DataFrame([pev.__dict__ for pev in self.pevs])
         
         
     def get_proportional_initial_dist(self):
@@ -127,4 +129,79 @@ class ChargeManagement(MultiAgentEnv):
         
         return shrink_rate, dist*shrink_rate
     
-   # def plot
+    def compute_straight_charge(self):
+        X, Y, M = [], [], []
+        for n in range(self.n_pevs):
+            item = self.df.iloc[n]
+            x = [t for t in range(int(item.t_start), int(item.t_end+1), 1)]
+            m = (item.target_charge - item.soc)/(item.t_end - item.t_start)
+            b = item.soc - m*item.t_start
+            y = [m*x_ +b for x_ in x]
+            M.append(m/5*60)
+            X.append(x)
+            Y.append(y)
+        
+        self.df['X'] = X
+        self.df['Y'] = Y        
+        self.df['p_charge_rate'] = M
+        
+    def compute_pev_plugin(self):
+        P, V = [], []
+
+        for t in range(self.total_samples):
+            p = 0
+            n_plugged = 0
+            for pev in self.pevs:
+                if t >= pev.t_start and t <= pev.t_end:
+                    n_plugged += 1
+                    p += pev.p_charge_rate
+            P.append(p)
+            V.append(n_plugged)
+            
+        self.P_sim = P
+        self.V_sim = V
+            
+        self.update_df()
+        
+    def plot_common(self):
+        plt.grid(True)
+        plt.xlim([0, self.total_samples]) 
+        
+    def update_df(self):
+        self.df = pd.DataFrame([pev.__dict__ for pev in self.pevs])
+        
+    def plot_ax(self, subplot, plots, n_plots):
+        if subplot: 
+            if n_plots == 0:
+                plt.rcParams['figure.figsize'] = [10, 15]
+            n_plots=n_plots+1
+            plt.subplot(len(plots),1,n_plots)
+        else: 
+            plt.figure()
+        return n_plots
+        self.plot_common()
+        
+    def plot_simulation(self, subplot=True, plots=[1,2,3]):
+        
+        assert hasattr(self.pevs[0],'X') # X must be created. Check in first sample
+        
+        
+        #fig = plt.figure()
+        n_plots = 0
+        samples = [i for i in range(self.total_samples)]
+        
+        self.plot_ax(subplot, plots, n_plots)
+        
+        if 1 in plots:
+            for pev in self.pevs:
+                plt.plot(pev.X,pev.Y)
+        
+        # Consumed power across the total time
+        if 2 in plots:
+            self.plot_ax(subplot, plots, n_plots)
+            plt.step(samples, self.P_sim)
+        
+        # Vehicles connected at the same time
+        if 3 in plots:
+            self.plot_ax(subplot, plots, n_plots)
+            plt.step(samples, self.V_sim)
