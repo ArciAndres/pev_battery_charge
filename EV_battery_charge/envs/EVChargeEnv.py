@@ -1,8 +1,8 @@
 import numpy as np
-from pev_battery_charge.envs.EVChargeManagement import PEV, ChargeStation, ChargeManagement
+from pev_battery_charge.envs.EVChargeManagement import PEV, ChargeStation, EVChargeBase
 from gym import spaces
 
-class EVChargeEnv(ChargeManagement):
+class EVChargeEnv(EVChargeBase):
     
     def __init__(self, n_pevs, 
                        soc_max=24,

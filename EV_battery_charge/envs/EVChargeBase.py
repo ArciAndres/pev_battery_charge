@@ -36,7 +36,7 @@ class ChargeStation():
         self.P_min = P_min
         self.P_max = P_max
 
-class ChargeManagement(MultiAgentEnv):
+class EVChargeBase(MultiAgentEnv):
     
     def __init__(self, pevs, 
                        charge_station,
