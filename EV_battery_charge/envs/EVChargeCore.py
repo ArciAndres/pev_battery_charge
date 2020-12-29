@@ -2,11 +2,17 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from numpy.random import random
-from pev_battery_charge.utils.utils import createDict
-from ray.rllib.env.multi_agent_env import MultiAgentEnv, ENV_STATE
+from EV_battery_charge.utils.utils import createDict
+from ray.rllib.env.multi_agent_env import MultiAgentEnv
 
 
 class PEV():
+    '''
+    Plug-in Electric Vehicle class.
+    It simulates the vehicle that gets connected to the station to charge itself. 
+    
+    
+    '''
     def __init__(self, soc_max=24,
                        xi=0.1, 
                        p_min=0, 
@@ -25,11 +31,16 @@ class PEV():
         self.target_charge = target_charge
         
 class ChargeStation():
-    
+    ''' 
+    Charge station class. 
+    In this setup, this element is initialized as a configuration object,
+    and it is assumed that every PEV that plugs-in to the load areauses a free 
+    charging station with these parameters.
+    '''
     def __init__(self,n_pevs_max=50, 
-                          n_pevs=0,
-                          P_min=0,
-                          P_max=35):
+                        n_pevs=0,
+                        P_min=0,
+                        P_max=35):
     
         self.n_pevs_max = n_pevs_max
         self.n_pevs = n_pevs
@@ -49,7 +60,6 @@ class EVChargeBase(MultiAgentEnv):
                        random_start_coeff = 1,
                        seed=1515,
                        
-
                  ):
 
         # This distribution of connections will put the agents across the total time, in an ordered pseudo random fashion
@@ -69,6 +79,12 @@ class EVChargeBase(MultiAgentEnv):
         
         self.distribute_load()
 
+    def seed(self, seed=None):
+        if seed is None:
+            np.random.seed(1)
+        else:
+            np.random.seed(seed)
+            
 #----------------------------------------------------------------
 #----------------- Distribution in load -------------------------
 #----------------------------------------------------------------
@@ -91,7 +107,7 @@ class EVChargeBase(MultiAgentEnv):
                 
             else:
                 pev.t_start = np.floor(T_start[i]+(T_start[i+self.random_start_coeff]-T_start[i])*random())
-                print(pev.t_start)
+                #print(pev.t_start)
                 
             charge_samples = pev.charge_time_desired/self.interval_length
             pev.t_end = np.floor(pev.t_start + charge_samples*(1-self.charge_duration_tolerance*(1-random())))
@@ -137,11 +153,12 @@ class EVChargeBase(MultiAgentEnv):
     
     def update_df(self):
         self.df = pd.DataFrame([pev.__dict__ for pev in self.pevs])
+        
 #-----------------------------------------------------------
 #---------------- Compute greedy charge --------------------
 #-----------------------------------------------------------
     
-    def compute_straight_charge(self):
+    def compute_greedy_charge(self):
         '''
         
         Computes a greedy approach for charge, simply generating a straight line between
