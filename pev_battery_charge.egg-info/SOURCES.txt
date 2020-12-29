@@ -1,7 +1,0 @@
-README.md
-setup.py
-pev_battery_charge.egg-info/PKG-INFO
-pev_battery_charge.egg-info/SOURCES.txt
-pev_battery_charge.egg-info/dependency_links.txt
-pev_battery_charge.egg-info/requires.txt
-pev_battery_charge.egg-info/top_level.txt

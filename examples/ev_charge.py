@@ -16,8 +16,6 @@ ev = EVChargeEnv(20, seed=1515)
 ev.compute_straight_charge()
 ev.compute_pev_plugin()
 #%%
-
-
 ev.plot_simulation(plots=[1])
 
 #%%
