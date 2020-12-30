@@ -95,10 +95,10 @@ class LoadArea():
         
         self.P_max = P_max
         self.P_min = P_min
-        self.stations = charge_stations
+        self.charge_stations = charge_stations
         self.pevs = pevs
         
-        self.plug_map = { station.ID: -1 for station in self.stations }
+        self.plug_map = { station.id: -1 for station in self.charge_stations }
 
 class EVChargeBase(MultiAgentEnv):
     
@@ -125,9 +125,9 @@ class EVChargeBase(MultiAgentEnv):
         # This distribution of connections will put the agents across the total time, 
         # in an ordered pseudo random fashion
         
-        self.n_pevs = len(pevs)
+        self.n_pevs = len(area.pevs)
         self.pevs = area.pevs
-        self.charge_stations = charge_stations
+        self.charge_stations = area.charge_stations
         self.interval_length = interval_length
         self.total_time = total_time
         self.charge_duration_tolerance = charge_duration_tolerance 

@@ -16,8 +16,8 @@ ev = EVChargeEnv(n_pevs=20, n_stations=10, seed=1515)
 ev.compute_greedy_charge()
 ev.compute_pev_plugin()
 #%%
-ev.plot_simulation(plots=[1])
+ev.plot_simulation(plots=[1,2,3])
 
 #%%
 
-for 
+ev.df = 

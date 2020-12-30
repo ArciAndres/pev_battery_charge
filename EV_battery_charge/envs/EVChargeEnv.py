@@ -42,13 +42,15 @@ class EVChargeEnv(EVChargeBase):
                      soc=initial_soc, 
                      charge_time_desired=charge_time_desired) for i in range(n_pevs)]
         
-        stations = [ChargeStation(ID=i, 
+        charge_stations = [ChargeStation(ID=i, 
                                   p_min=p_min, 
                                   p_max=p_max) for i in range(n_stations)]
         
-        load_area = LoadArea(P_max=P_max, P_min=P_min, charge_stations=stations, pevs=pevs)
+        load_area = LoadArea(P_max=P_max, P_min=P_min, 
+                             charge_stations=charge_stations, 
+                             pevs=pevs)
         
-        super().__init__(pevs=pevs, charge_stations=stations)
+        super().__init__(area=load_area)
         
     def _actionSpace(self):
         
