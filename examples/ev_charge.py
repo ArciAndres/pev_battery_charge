@@ -10,7 +10,7 @@ import numpy as np
 from EV_battery_charge.envs.EVChargeEnv import EVChargeEnv
 from pdb import set_trace
 
-ev = EVChargeEnv(20, seed=1515)
+ev = EVChargeEnv(n_pevs=20, n_stations=10, seed=1515)
 
 #%%
 ev.compute_greedy_charge()

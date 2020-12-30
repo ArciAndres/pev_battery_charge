@@ -1,5 +1,5 @@
 import numpy as np
-from EV_battery_charge.envs.EVChargeCore import PEV, ChargeStation, EVChargeBase
+from EV_battery_charge.envs.EVChargeCore import PEV, ChargeStation, EVChargeBase, LoadArea
 from gym import spaces
 
 class EVChargeEnv(EVChargeBase):
@@ -22,24 +22,33 @@ class EVChargeEnv(EVChargeBase):
                        initial_soc=0,
                        xi=0.1,
                        P_max=200,
+                       P_min=0,
                        interval_length=5,
                        total_time=960,
                        initial_charge_max=0.5,
                        initial_charge_min=0,
                        seed=1515,
                        charge_duration_tolerance=0.2,
-                       pevs=None
+                       random_start_coeff=1,
+                       pevs=None,
                        ):
         
         self.n_pevs = n_pevs
         self.n_stations = n_stations
         
-        pevs = [PEV(soc_max=soc_max, xi=xi, p_min=p_min, p_max=p_max,
-                         soc=initial_soc, charge_time_desired=charge_time_desired) for i in range(n_pevs)]
+        pevs = [PEV( ID=i,
+                     soc_max=soc_max, 
+                     xi=xi,
+                     soc=initial_soc, 
+                     charge_time_desired=charge_time_desired) for i in range(n_pevs)]
         
-        station = [ChargeStation(n_pevs=len(pevs), P_max=P_max) for _ in n_stations]
+        stations = [ChargeStation(ID=i, 
+                                  p_min=p_min, 
+                                  p_max=p_max) for i in range(n_stations)]
         
-        super().__init__(pevs=pevs, charge_station=station)
+        load_area = LoadArea(P_max=P_max, P_min=P_min, charge_stations=stations, pevs=pevs)
+        
+        super().__init__(pevs=pevs, charge_stations=stations)
         
     def _actionSpace(self):
         

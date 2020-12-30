@@ -41,7 +41,7 @@ class PEV():
                        t_end=None
                        ):
         
-        self.ID = ID
+        self.id = ID
         self.soc_max = soc_max
         self.xi = xi
         self.soc = soc
@@ -53,9 +53,12 @@ class PEV():
 class ChargeStation():
     ''' 
     Charge station class. 
-    In this setup, this element is initialized as a configuration object,
+    (Virtual Charge Stations. They are not necessarily the same in a real world
+     setup) In this setup, this element is initialized as a configuration object,
     and it is assumed that every PEV that plugs-in to the load area uses a free 
     charging station with these parameters.
+    
+    
     
     Parameters
     ----------
@@ -71,10 +74,12 @@ class ChargeStation():
         Only when plugged. Remaining time (minutes) for the PEV to plug out. 
     '''
     
-    def __init__(self, p_min=0,
+    def __init__(self, ID,
+                       p_min=0,
                        p_max=22,
                        plugged=False):
-    
+        
+        self.id = ID
         self.p_min = p_min
         self.p_max = p_max
         self.plugged = plugged
@@ -90,7 +95,10 @@ class LoadArea():
         
         self.P_max = P_max
         self.P_min = P_min
+        self.stations = charge_stations
+        self.pevs = pevs
         
+        self.plug_map = { station.ID: -1 for station in self.stations }
 
 class EVChargeBase(MultiAgentEnv):
     
@@ -104,22 +112,21 @@ class EVChargeBase(MultiAgentEnv):
     pevs: 
     """
     
-    def __init__(self, pevs, 
-                       charge_stations,
-                       
+    def __init__(self, area,
                        interval_length=5,
                        total_time=960, 
                        charge_duration_tolerance=0.2,
                        initial_charge_max=0.5,
                        initial_charge_min=0,
-                       random_start_coeff = 1,
+                       random_start_coeff=1,
                        seed=1515,
                  ):
 
-        # This distribution of connections will put the agents across the total time, in an ordered pseudo random fashion
+        # This distribution of connections will put the agents across the total time, 
+        # in an ordered pseudo random fashion
         
         self.n_pevs = len(pevs)
-        self.pevs = pevs
+        self.pevs = area.pevs
         self.charge_stations = charge_stations
         self.interval_length = interval_length
         self.total_time = total_time
@@ -129,9 +136,9 @@ class EVChargeBase(MultiAgentEnv):
         self.random_start_coeff = random_start_coeff
         self.seed = seed
         
-        self.total_samples = int(total_time/interval_length)
+        self.total_timesteps = int(total_time/interval_length)
         
-        self.distribute_load()
+        self.build_random_schedule()
     
     
     def step(self, action_dict):
@@ -148,7 +155,7 @@ class EVChargeBase(MultiAgentEnv):
     
     def reset(self):
         self.timestep = 0
-        self.distribute_load()
+        self.build_random_schedule()
         self.update_charge_stations()
 
     def seed(self, seed=None):
@@ -156,19 +163,13 @@ class EVChargeBase(MultiAgentEnv):
             np.random.seed(1)
         else:
             np.random.seed(seed)
-    
-    def update_charge_stations(self):
-        """
-        Assigns the PEVs to a free ChargeStation, and adds it to the mapping
-        Important method. Different handle of data wrt the paper
-        """
         
         
 #----------------------------------------------------------------
 #----------------- Distribution in load -------------------------
 #----------------------------------------------------------------
                 
-    def build_schedule(self):
+    def build_random_schedule(self):
         """
         Performs a distribution of the load between the based on the parameters
         of the given PEVs, scheduling an pseudo-random hour of charge and initial
@@ -180,10 +181,10 @@ class EVChargeBase(MultiAgentEnv):
         np.random.seed(self.seed)
         
         # charge_samples = charge_duration_max/interval_length
-        # total_samples_start = total_samples-charge_samples # Allowed start sample. 
+        # total_timesteps_start = total_timesteps-charge_samples # Allowed start sample. 
         # Cannot start charging at very end of all, for example
         rate, proportional_dist = self.get_shrinking_rate()
-        T_start = proportional_dist*self.total_samples
+        T_start = proportional_dist*self.total_timesteps
         
         for i , pev in enumerate(self.pevs):
             
@@ -249,8 +250,8 @@ class EVChargeBase(MultiAgentEnv):
         
         Computes a greedy approach for charge, simply generating a straight line between
         the initial and target SOC value. The mean charge power is the slope of the line, m.
-        The value of m should not exceed the p_max value. Otherwise, the charge goal not be
-        reached in any method.
+        The value of m should not exceed the p_max value. Otherwise, the charge goal 
+        will not be reached by any method.
         
         '''
         for pev in self.pevs:
@@ -262,26 +263,35 @@ class EVChargeBase(MultiAgentEnv):
             pev.Y = [pev.p_charge_rate*x_ + b for x_ in pev.X]
         
         self.update_df()
-        
+    
     def compute_pev_plugin(self):
-        P, pluggled_sim = [], []
+        pluggled_sim = []
 
-        for t in range(self.total_samples):
-            p = 0
+        for t in range(self.total_timesteps):
             n_plugged = 0
             for pev in self.pevs:
                 if t >= pev.t_start and t <= pev.t_end:
                     n_plugged += 1
-                    p += pev.p_charge_rate
-            P.append(p)
             pluggled_sim.append(n_plugged)
             
-        self.P_sim = P
         self.pluggled_sim = pluggled_sim
-            
         self.update_df()
-        
     
+    def compute_power_ideal(self):
+
+        assert hasattr(self.pevs[0], 'p_charge_rate'), \
+            "compute_greedy_charge method must be executed before."
+             
+        P = []
+
+        for t in range(self.total_timesteps):
+            p = 0
+            for pev in self.pevs:
+                if t >= pev.t_start and t <= pev.t_end:
+                    p += pev.p_charge_rate
+            P.append(p)
+        self.P_sim = P
+                
 #-----------------------------------------------------------
 #------------------- Plotting methods ----------------------
 #-----------------------------------------------------------
@@ -289,7 +299,7 @@ class EVChargeBase(MultiAgentEnv):
     def plot_common(self):
         # Add grid and limits the X axis in corresponding samples. 
         plt.grid(True)
-        plt.xlim([0, self.total_samples]) 
+        plt.xlim([0, self.total_timesteps]) 
         
     def plot_ax(self, plots, n_plots):
         n_plots += 1
@@ -308,7 +318,7 @@ class EVChargeBase(MultiAgentEnv):
         plt.figure(figlabel)
         
         n_plots = 0
-        samples = [i for i in range(self.total_samples)]
+        timesteps = [i for i in range(self.total_timesteps)]
         
         if 1 in plots:
             assert hasattr(self.pevs[0],'X') # X must be created. Check in first sample
@@ -318,12 +328,12 @@ class EVChargeBase(MultiAgentEnv):
         
         # Consumed power across the total time
         if 2 in plots:
-            assert hasattr(self,'P_sim') 
+            assert hasattr(self,'P_sim'), "Power simulation has not been performed."
             n_plots = self.plot_ax(plots, n_plots)
-            plt.step(samples, self.P_sim)
+            plt.step(timesteps, self.P_sim)
         
         # Vehicles connected at the same time
         if 3 in plots:
-            assert hasattr(self,'V_sim') 
+            assert hasattr(self,'pluggled_sim'), "Plugged-in simulation has not been performed."
             n_plots = self.plot_ax(plots, n_plots)
-            plt.step(samples, self.pluggled_sim)
+            plt.step(timesteps, self.pluggled_sim)
