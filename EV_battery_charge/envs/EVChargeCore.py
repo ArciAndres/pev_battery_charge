@@ -9,23 +9,31 @@ from ray.rllib.env.multi_agent_env import MultiAgentEnv
 class PEV():
     '''
     Plug-in Electric Vehicle class.
-    It simulates the vehicle that gets connected to the station to charge itself. 
+    It simulates the vehicle that gets connected to the station to charge itself.
     
+    Parameters
+    ----------
+    soc_max: int 
+        Complete level of SOC (State of charge)
+    xi: float
+        Conversion losses parameter
     
     '''
-    def __init__(self, soc_max=24,
+    def __init__(self, ID, 
+                       soc_max=24,
                        xi=0.1, 
                        p_min=0, 
                        p_max=22,
                        soc=0,
                        charge_time_desired=180,
-                       target_charge=24
+                       target_charge=24,
+                       t_start=None,
+                       t_end=None
                        ):
         
+        self.ID = ID
         self.soc_max = soc_max
         self.xi = xi
-        self.p_min = p_min
-        self.p_max = p_max
         self.soc = soc
         self.charge_time_desired = charge_time_desired
         self.target_charge = target_charge
@@ -34,23 +42,38 @@ class ChargeStation():
     ''' 
     Charge station class. 
     In this setup, this element is initialized as a configuration object,
-    and it is assumed that every PEV that plugs-in to the load areauses a free 
+    and it is assumed that every PEV that plugs-in to the load area uses a free 
     charging station with these parameters.
     '''
-    def __init__(self,n_pevs_max=50, 
-                        n_pevs=0,
-                        P_min=0,
-                        P_max=35):
+    def __init__(self, p_min=0,
+                       p_max=22,
+                       plugged=False):
     
-        self.n_pevs_max = n_pevs_max
-        self.n_pevs = n_pevs
-        self.P_min = P_min
+        self.p_min = p_min
+        self.p_max = p_max
+        self.plugged = plugged
+        self.soc_left = 0
+        self.t_left = 0
+        
+class LoadArea():
+    def __init__(self, 
+                 P_max,
+                 P_min,
+                 charge_stations,
+                 pevs):
+        
         self.P_max = P_max
+        self.P_min = P_min
+        
 
 class EVChargeBase(MultiAgentEnv):
     
+    """
+    
+    """
+    
     def __init__(self, pevs, 
-                       charge_station,
+                       charge_stations,
                        
                        interval_length=5,
                        total_time=960, 
@@ -59,14 +82,13 @@ class EVChargeBase(MultiAgentEnv):
                        initial_charge_min=0,
                        random_start_coeff = 1,
                        seed=1515,
-                       
                  ):
 
         # This distribution of connections will put the agents across the total time, in an ordered pseudo random fashion
         
         self.n_pevs = len(pevs)
         self.pevs = pevs
-        self.charge_station = charge_station
+        self.charge_stations = charge_stations
         self.interval_length = interval_length
         self.total_time = total_time
         self.charge_duration_tolerance = charge_duration_tolerance 
@@ -78,13 +100,38 @@ class EVChargeBase(MultiAgentEnv):
         self.total_samples = int(total_time/interval_length)
         
         self.distribute_load()
+    
+    
+    def step(self, action_dict):
+        
+        # Apply load to the cars PEV. Update SOC. 
+        self.timestep += 1
+                
+        self._computeReward()
+        self._computeObservation()
+        self._computeInfo()
+        self._computeDone()
+        
+        self.update_charge_stations() # Plugs or unplugs vehicles depending on t
+    
+    def reset(self):
+        self.timestep = 0
+        self.distribute_load()
+        self.update_charge_stations()
 
     def seed(self, seed=None):
         if seed is None:
             np.random.seed(1)
         else:
             np.random.seed(seed)
-            
+    
+    def update_charge_stations(self):
+        """
+        Assigns the PEVs to a free ChargeStation, and adds it to the mapping
+        Important method. Different handle of data wrt the paper
+        """
+        
+        
 #----------------------------------------------------------------
 #----------------- Distribution in load -------------------------
 #----------------------------------------------------------------
@@ -94,7 +141,8 @@ class EVChargeBase(MultiAgentEnv):
         np.random.seed(self.seed)
         
         # charge_samples = charge_duration_max/interval_length
-        # total_samples_start = total_samples-charge_samples # Allowed start sample. Cannot start charging at very end of all, for example
+        # total_samples_start = total_samples-charge_samples # Allowed start sample. 
+        # Cannot start charging at very end of all, for example
         rate, proportional_dist = self.get_shrinking_rate()
         T_start = proportional_dist*self.total_samples
         

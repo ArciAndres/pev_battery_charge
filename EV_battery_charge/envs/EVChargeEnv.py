@@ -5,8 +5,8 @@ from gym import spaces
 class EVChargeEnv(EVChargeBase):
     '''
     Plug-in Electric Vehicle Charing environment. 
-    
-    '''
+    A simulation of a charging station as a multi-agent system.
+    '''    
     
     def __init__(self, n_pevs, 
                        soc_max=24,
@@ -30,9 +30,9 @@ class EVChargeEnv(EVChargeBase):
         pevs = [PEV(soc_max=soc_max, xi=xi, p_min=p_min, p_max=p_max,
                          soc=initial_soc, charge_time_desired=charge_time_desired) for i in range(n_pevs)]
         
-        station = ChargeStation(pevs, n_pevs=len(pevs), P_max=P_max)
+        station = ChargeStation(n_pevs=len(pevs), P_max=P_max)
         
-        super().__init__(charge_station=station)
+        super().__init__(pevs=pevs, charge_station=station)
         
     def _actionSpace(self):
         
@@ -57,8 +57,17 @@ class EVChargeEnv(EVChargeBase):
         return spaces.Dict({ str(i): spaces.Dict ({"state": spaces.Box(low=obs_lower_bound, high=obs_upper_bound, dtype=np.float32),
                                                     "neighbors": spaces.MultiBinary(self.NUM_DRONES) }) for i in range(self.NUM_DRONES) })
 
+    def _computeReward(self):
+        raise NotImplementedError()
         
-            
+    def _computeObservation(self):
+        raise NotImplementedError()
+        
+    def _computeInfo(self):
+        raise NotImplementedError()
+    
+    def _computeDone(self):
+        raise NotImplementedError()
         
          
         
