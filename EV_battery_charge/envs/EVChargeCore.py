@@ -13,20 +13,30 @@ class PEV():
     
     Parameters
     ----------
-    soc_max: int 
+    soc_max : int 
         Complete level of SOC (State of charge)
-    xi: float
+    xi : float
         Conversion losses parameter
-    
+    soc : float
+        State Of Charge. Energy stored in the PEV battery currently. 
+        Zero means totally discharged. 
+    charge_time_desired : int
+        Defined in minutes. Expected time of charge when plugged in to the station
+    soc_ref : float
+        Expected level of SOC to be reached during charge.
+    t_start : int
+        Time of the day (in minutes) when the PEV is scheduled to be plugged in 
+        The difference between t_start and t_end must match charge_time_desired.
+    t_end : int
+        Time of the day (in minutes) when the PEV is scheduled to be plugged out
+        The difference between t_start and t_end must match charge_time_desired.
     '''
     def __init__(self, ID, 
                        soc_max=24,
                        xi=0.1, 
-                       p_min=0, 
-                       p_max=22,
                        soc=0,
                        charge_time_desired=180,
-                       target_charge=24,
+                       soc_ref=24,
                        t_start=None,
                        t_end=None
                        ):
@@ -36,7 +46,9 @@ class PEV():
         self.xi = xi
         self.soc = soc
         self.charge_time_desired = charge_time_desired
-        self.target_charge = target_charge
+        self.soc_ref = soc_ref
+        self.t_start = t_start
+        self.t_end = t_end
         
 class ChargeStation():
     ''' 
@@ -44,7 +56,21 @@ class ChargeStation():
     In this setup, this element is initialized as a configuration object,
     and it is assumed that every PEV that plugs-in to the load area uses a free 
     charging station with these parameters.
+    
+    Parameters
+    ----------
+    p_min : float
+        Minimum power value (kW) to be delivered PEV.
+    p_max : float
+        Maximum power value (kW) to be delivered to the PEV.
+    plugged : bool
+        Indicates if the charge station has a PEV plugged-in or it is free. 
+    soc_left : float
+        Only when plugged. Amount of SOC remaining to be delivered to the PEV.
+    t_left : int
+        Only when plugged. Remaining time (minutes) for the PEV to plug out. 
     '''
+    
     def __init__(self, p_min=0,
                        p_max=22,
                        plugged=False):
@@ -69,7 +95,13 @@ class LoadArea():
 class EVChargeBase(MultiAgentEnv):
     
     """
+    Core class of the EVCharge environment. It handles the interaction between
+    PEVs, charge stations and the multiple variables.
     
+    Parameters
+    ----------
+    
+    pevs: 
     """
     
     def __init__(self, pevs, 
@@ -136,7 +168,14 @@ class EVChargeBase(MultiAgentEnv):
 #----------------- Distribution in load -------------------------
 #----------------------------------------------------------------
                 
-    def distribute_load(self):
+    def build_schedule(self):
+        """
+        Performs a distribution of the load between the based on the parameters
+        of the given PEVs, scheduling an pseudo-random hour of charge and initial
+        SOC over the total programmed charge time.
+        It is used as a reset to the environment. It is not needed when the 
+        schedule is provided.         
+        """
         
         np.random.seed(self.seed)
         
@@ -171,7 +210,6 @@ class EVChargeBase(MultiAgentEnv):
         Distributes the PEVs along the total charge time proportionally to their own
         charge time. 
         
-        Example:
         '''
         
         total_charge_time_no_overlap = sum([pev.charge_time_desired for pev in self.pevs])
@@ -219,14 +257,14 @@ class EVChargeBase(MultiAgentEnv):
             pev.X = [t for t in range(int(pev.t_start), int(pev.t_end+1), 1)]
             
             # m is the slope of the straight line. It is a measure of power in [kW]
-            pev.p_charge_rate = (pev.target_charge - pev.soc)/(pev.t_end - pev.t_start) / self.interval_length * 60
+            pev.p_charge_rate = (pev.soc_ref - pev.soc)/(pev.t_end - pev.t_start) / self.interval_length * 60
             b = pev.soc - pev.p_charge_rate * pev.t_start
             pev.Y = [pev.p_charge_rate*x_ + b for x_ in pev.X]
         
         self.update_df()
         
     def compute_pev_plugin(self):
-        P, V = [], []
+        P, pluggled_sim = [], []
 
         for t in range(self.total_samples):
             p = 0
@@ -236,10 +274,10 @@ class EVChargeBase(MultiAgentEnv):
                     n_plugged += 1
                     p += pev.p_charge_rate
             P.append(p)
-            V.append(n_plugged)
+            pluggled_sim.append(n_plugged)
             
         self.P_sim = P
-        self.V_sim = V
+        self.pluggled_sim = pluggled_sim
             
         self.update_df()
         
@@ -288,4 +326,4 @@ class EVChargeBase(MultiAgentEnv):
         if 3 in plots:
             assert hasattr(self,'V_sim') 
             n_plots = self.plot_ax(plots, n_plots)
-            plt.step(samples, self.V_sim)
+            plt.step(samples, self.pluggled_sim)
