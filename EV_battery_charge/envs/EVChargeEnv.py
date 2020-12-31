@@ -12,53 +12,43 @@ class EVChargeEnv(EVChargeBase):
     
     '''    
     
-    def __init__(self, n_pevs, 
-                       n_stations,
-                       args, 
-                      
-                       ):
+    def __init__(self, args):
         
-        self.n_pevs = n_pevs
-        self.n_stations = n_stations
+        self.n_pevs = args.n_pevs
+        self.n_stations = args.num_agents
         
         self.p_max = args.p_max
         self.p_min = args.p_min
         self.soc_ref = args.soc_ref
         self.charge_time_desired = args.charge_time_desired
-        self.initial_soc = args.initial_soc
+        self.soc_initial = args.soc_initial
+        self.soc_max = args.soc_max
         self.xi = args.xi
         self.P_max = args.P_max
         self.P_min = args.P_min
-        self.interval_length = args.interval_length
-        self.total_time = args.total_time
-        self.initial_charge_max = args.initial_charge_max
-        self.initial_charge_min = args.initial_charge_min
         self.seed = args.seed
-        self.charge_duration_tolerance = args.charge_duration_tolerance
-        self.random_start_coeff = args.random_start_coeff=1
-        self.pevs = args.pevs
                        
         pevs = [PEV( ID=i,
-                     soc_max=self.soc_max, 
+                     soc_max=self.soc_max,
                      xi=self.xi,
-                     soc=self.initial_soc, 
-                     charge_time_desired=self.charge_time_desired) for i in range(n_pevs)]
+                     soc=self.soc_initial, 
+                     charge_time_desired=self.charge_time_desired) for i in range(self.n_pevs)]
         
         charge_stations = [ChargeStation(ID=i, 
                                   p_min=self.p_min, 
-                                  p_max=self.p_max) for i in range(n_stations)]
+                                  p_max=self.p_max) for i in range(self.n_stations)]
         
-        load_area = LoadArea(P_max=self.P_max, P_min=self.P_min, 
+        self.area = LoadArea(P_max=self.P_max, P_min=self.P_min, 
                              charge_stations=charge_stations, 
                              pevs=pevs)
         
-        super().__init__(area=load_area, args=args)
+        super().__init__(args=args)
         
     def _actionSpace(self):
-        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in self.n_stations]
+        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
     
     def _observationSpace(self):
-        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in self.n_stations]
+        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
     
     def _preprocessAction(self, actions):
         # Here we could clip 

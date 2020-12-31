@@ -105,8 +105,7 @@ class LoadArea():
         self.P_min = P_min
         self.charge_stations = charge_stations
         self.pevs = pevs
-        
-        self.plug_map = { station.id: -1 for station in self.charge_stations }
+        self.P = 0        
 
 class EVChargeBase(gym.Env):
     
@@ -120,37 +119,27 @@ class EVChargeBase(gym.Env):
     area: 
     """
     
-    def __init__(self, area,
-                       sampling_time=5,
-                       total_time=960, 
-                       charge_duration_tolerance=0.2,
-                       initial_charge_max=0.5,
-                       initial_charge_min=0,
-                       random_start_coeff=1,
-                       seed=1515,
-                 ):
+    def __init__(self, args):
 
         # This distribution of connections will put the agents across the total time, 
         # in an ordered pseudo random fashion
         
-        self.n_pevs = len(area.pevs)
-        self.pevs = area.pevs
-        self.charge_stations = area.charge_stations
-        self.sampling_time = sampling_time
-        self.total_time = total_time
-        self.charge_duration_tolerance = charge_duration_tolerance 
-        self.initial_charge_max = initial_charge_max
-        self.initial_charge_min = initial_charge_min
-        self.random_start_coeff = random_start_coeff
-        self.seed = seed
-        self.total_timesteps = int(total_time/sampling_time)
+        self.n_pevs = len(self.area.pevs)
+        self.pevs = self.area.pevs
+        self.charge_stations = self.area.charge_stations
+        self.sampling_time = args.sampling_time
+        self.total_time = args.total_time
+        self.charge_duration_tolerance = args.charge_duration_tolerance
+        self.initial_charge_max = args.initial_charge_max
+        self.random_start_coeff = args.random_start_coeff
+        self.total_timesteps = int(self.total_time/self.sampling_time)
         
         self.action_space = self._actionSpace()
         self.observation_space = self._observationSpace()
         self.reset()
     
     
-    def step(self, actions: list(float)):
+    def step(self, actions):
         """
         Apply power to the PEV, which will increase their SOC (if plugged-in)
         
@@ -193,11 +182,11 @@ class EVChargeBase(gym.Env):
     
     def reset(self):
         self.timestep = 0
-        self.seed()
+        self._seed()
         self.build_random_schedule()
         self.compute_pev_plugin()
     
-    def seed(self):
+    def _seed(self):
         if self.seed is None:
             np.random.seed(1)
         else:

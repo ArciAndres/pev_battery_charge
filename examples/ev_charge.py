@@ -9,8 +9,11 @@ Created on Tue Oct 20 19:46:43 2020
 import numpy as np
 from EV_battery_charge.envs.EVChargeEnv import EVChargeEnv
 from pdb import set_trace
+from config_ev1 import get_config 
 
-env = EVChargeEnv(n_pevs=20, n_stations=10, seed=1515)
+config = get_config(notebook=True)
+#%%
+env = EVChargeEnv(args=config)
 
 #%%
 env.compute_greedy_charge()
