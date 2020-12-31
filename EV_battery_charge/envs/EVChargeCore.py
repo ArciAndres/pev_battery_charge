@@ -26,10 +26,10 @@ class PEV():
     soc_ref : float
         Expected level of SOC to be reached during charge.
     t_start : int
-        Time of the day (in minutes) when the PEV is scheduled to be plugged in 
+        Time of the day (in TIMESTEP, NOT minutes) when the PEV is scheduled to be plugged in 
         The difference between t_start and t_end must match charge_time_desired.
     t_end : int
-        Time of the day (in minutes) when the PEV is scheduled to be plugged out
+        Time of the day (in TIMESTEP, NOT minutes) when the PEV is scheduled to be plugged out
         The difference between t_start and t_end must match charge_time_desired.
     '''
     def __init__(self, ID, 
@@ -52,7 +52,7 @@ class PEV():
         self.t_end = t_end
         
     def SOC_update(self, p):
-        self.soc += (1 - self.xi)*
+        self.soc += (1 - self.xi)*self.sampling_time*p
         
 class ChargeStation():
     ''' 
@@ -90,6 +90,7 @@ class ChargeStation():
         self.plugged = plugged
         self.soc_left = 0
         self.t_left = 0
+        self.pev_id = -1 # No PEV assigned 
         
 class LoadArea():
     """ Load Area simulation. It handles the operations of the charging stations"""
@@ -159,24 +160,37 @@ class EVChargeBase(gym.Env):
         
         """
         # Apply load to the cars PEV. Update SOC. 
-        self.timestep += 1
         
         actions = self._preprocessAction(actions)
         
+        P = 0 # Total Power of the load area
         for cs, action in zip(self.charge_stations, actions):
             cs.p = action
             pev_id = self.cs_schedule[self.timestep][cs.id]
-            
-            
-                
-        observation = self._computeObservation()
-        reward = self._computeReward()
-        info = self._computeInfo()
-        done = self._computeDone()
+            self.pevs[pev_id].SOC_update(cs.p)
+            P += cs.p
         
-        self.update_charge_stations() # Plugs or unplugs vehicles depending on t
+        self.area.P = P
         
+        # The variables are saved in the environment for debugging purposes. 
+        self.observation = self._computeObservation()
+        self.reward = self._computeReward()
+        self.info = self._computeInfo()
+        self.done = self._computeDone()
         
+        self.schedule_step() # Plugs or unplugs vehicles depending on t
+        self.timestep += 1
+        
+        return self.observation, self.reward, self.info, self.done
+        
+    def schedule_step(self):
+        """ Synchronize the schedule with the values in the Charging Stations """
+        
+        for cs in self.charge_stations:
+            cs.pev_id = self.cs_schedule[self.timestep][cs.id]
+            cs.plugged = cs.pev_id != -1
+
+    
     def reset(self):
         self.timestep = 0
         self.seed()
@@ -329,6 +343,7 @@ class EVChargeBase(gym.Env):
         
         # cs --> Charging Station
         cs_schedule = []
+        pev_schedule = []
 
         # mappings from ChargingStations to PEV ids, and viceversa
         # -1 means
@@ -350,10 +365,12 @@ class EVChargeBase(gym.Env):
                         pev2cs[pev_id] = -1
                         
             cs_schedule.append(cs2pev.copy())
-        
+            pev_schedule.append(pev2cs.copy())
+            
         self.cs_schedule = cs_schedule
+        self.pev_schedule = pev_schedule
         
-        return plug_schedule, cs_schedule
+        return plug_schedule, cs_schedule, pev_schedule
     
     def compute_power_ideal(self):
 

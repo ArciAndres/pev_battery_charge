@@ -59,14 +59,35 @@ class EVChargeEnv(EVChargeBase):
         return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in self.n_stations]
     
     def _preprocessAction(self, actions):
-        # Here we could clip or normalize. 
+        # Here we could clip 
         return actions
     
     def _computeReward(self):
         raise NotImplementedError()
         
     def _computeObservation(self):
-        raise NotImplementedError()
+        """
+        Consider that the agents are the charging stations.
+        Only local information is collected. The only global information known
+        to the station is the total area power. 
+        
+        """
+        
+        observations = []
+                
+        for cs in self.charge_stations:
+            pev = self.pevs[cs.pev_id]
+            soc_remain = pev.soc - pev.soc_ref
+            timesteps_remaining = pev.t_end - self.timestep
+            observations.append([cs.p_min, 
+                                 cs.p_max, 
+                                 cs.plugged, 
+                                 soc_remain,
+                                 timesteps_remaining, 
+                                 self.area.P])
+                
+        return observations
+        
         
     def _computeInfo(self):
         raise NotImplementedError()
