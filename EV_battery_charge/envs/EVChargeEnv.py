@@ -63,7 +63,32 @@ class EVChargeEnv(EVChargeBase):
         return actions
     
     def _computeReward(self):
-        raise NotImplementedError()
+        """ Reward has multiple weights and penalizations. """
+        
+        rewards = []
+        
+        
+        
+        for cs in self.charge_stations:
+            rew = [0]*5
+            if cs.plugged:
+                pev = self.pevs[cs.pev_id]
+                
+                # Penalization on remaining SOC
+                soc_remain = pev.soc - pev.soc_ref
+                rew[0] = soc_remain/self.soc_ref # Normalized on the reference, not max
+                
+                # Penalization surpassing local limit
+                if cs.p > cs.p_max or cs.p < cs.p_min:
+                    rew[1] = (-1)
+                
+                # Penalization surpassing global limit
+                if self.area.P > self.area.P_max or self.area.P < self.area.P_min:
+                    rew[2] = (-1)
+            
+            reward = np.array(rew)*self.rew_weights
+            
+            rewards.append(sum(reward))                
         
     def _computeObservation(self):
         """
@@ -80,12 +105,13 @@ class EVChargeEnv(EVChargeBase):
             soc_remain = pev.soc - pev.soc_ref
             timesteps_remaining = pev.t_end - self.timestep
             observations.append([cs.p_min, 
-                                 cs.p_max, 
+                                 cs.p_max,
+                                 self.area.P_max,
                                  cs.plugged, 
                                  soc_remain,
                                  timesteps_remaining, 
                                  self.area.P])
-                
+        
         return observations
         
         
