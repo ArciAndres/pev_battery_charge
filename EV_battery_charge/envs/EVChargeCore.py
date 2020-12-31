@@ -51,6 +51,9 @@ class PEV():
         self.t_start = t_start
         self.t_end = t_end
         
+    def SOC_update(self, p):
+        self.soc += (1 - self.xi)*
+        
 class ChargeStation():
     ''' 
     Charge station class. 
@@ -117,7 +120,7 @@ class EVChargeBase(gym.Env):
     """
     
     def __init__(self, area,
-                       interval_length=5,
+                       sampling_time=5,
                        total_time=960, 
                        charge_duration_tolerance=0.2,
                        initial_charge_max=0.5,
@@ -132,14 +135,14 @@ class EVChargeBase(gym.Env):
         self.n_pevs = len(area.pevs)
         self.pevs = area.pevs
         self.charge_stations = area.charge_stations
-        self.interval_length = interval_length
+        self.sampling_time = sampling_time
         self.total_time = total_time
         self.charge_duration_tolerance = charge_duration_tolerance 
         self.initial_charge_max = initial_charge_max
         self.initial_charge_min = initial_charge_min
         self.random_start_coeff = random_start_coeff
         self.seed = seed
-        self.total_timesteps = int(total_time/interval_length)
+        self.total_timesteps = int(total_time/sampling_time)
         
         self.action_space = self._actionSpace()
         self.observation_space = self._observationSpace()
@@ -158,8 +161,13 @@ class EVChargeBase(gym.Env):
         # Apply load to the cars PEV. Update SOC. 
         self.timestep += 1
         
-        # for cs in self.charge_stations:
-        #     cs
+        actions = self._preprocessAction(actions)
+        
+        for cs, action in zip(self.charge_stations, actions):
+            cs.p = action
+            pev_id = self.cs_schedule[self.timestep][cs.id]
+            
+            
                 
         observation = self._computeObservation()
         reward = self._computeReward()
@@ -196,7 +204,7 @@ class EVChargeBase(gym.Env):
         
         np.random.seed(self.seed)
         
-        # charge_samples = charge_duration_max/interval_length
+        # charge_samples = charge_duration_max/sampling_time
         # total_timesteps_start = total_timesteps-charge_samples # Allowed start sample. 
         # Cannot start charging at very end of all, for example
         rate, proportional_dist = self.get_shrinking_rate()
@@ -213,7 +221,7 @@ class EVChargeBase(gym.Env):
                 pev.t_start = np.floor(T_start[i]+(T_start[i+self.random_start_coeff]-T_start[i])*random())
                 #print(pev.t_start)
                 
-            charge_samples = pev.charge_time_desired/self.interval_length
+            charge_samples = pev.charge_time_desired/self.sampling_time
             pev.t_end = np.floor(pev.t_start + charge_samples*(1-self.charge_duration_tolerance*(1-random())))
             
             # SOC can be any number between 0 and soc_max
@@ -274,7 +282,7 @@ class EVChargeBase(gym.Env):
             pev.X = [t for t in range(int(pev.t_start), int(pev.t_end+1), 1)]
             
             # m is the slope of the straight line. It is a measure of power in [kW]
-            pev.p_charge_rate = (pev.soc_ref - pev.soc)/(pev.t_end - pev.t_start) / self.interval_length * 60
+            pev.p_charge_rate = (pev.soc_ref - pev.soc)/(pev.t_end - pev.t_start) / self.sampling_time * 60
             b = pev.soc - pev.p_charge_rate * pev.t_start
             pev.Y = [pev.p_charge_rate*x_ + b for x_ in pev.X]
         
