@@ -111,7 +111,7 @@ class EVChargeBase(MultiAgentEnv):
     Parameters
     ----------
     
-    pevs: 
+    area: 
     """
     
     def __init__(self, area,
