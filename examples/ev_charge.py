@@ -10,14 +10,19 @@ import numpy as np
 from EV_battery_charge.envs.EVChargeEnv import EVChargeEnv
 from pdb import set_trace
 
-ev = EVChargeEnv(n_pevs=20, n_stations=10, seed=1515)
+env = EVChargeEnv(n_pevs=20, n_stations=10, seed=1515)
 
 #%%
-ev.compute_greedy_charge()
-ev.compute_pev_plugin()
+env.compute_greedy_charge()
+env.compute_power_ideal()
+env.compute_pev_plugin()
 #%%
-ev.plot_simulation(plots=[1,2,3])
+env.plot_simulation(plots=[1,2,3])
 
 #%%
 
-ev.df = 
+plug_schedule = env.plug_schedule
+
+
+#%%
+    

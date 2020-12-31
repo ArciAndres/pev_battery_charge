@@ -87,6 +87,8 @@ class ChargeStation():
         self.t_left = 0
         
 class LoadArea():
+    """ Load Area simulation. It handles the operations of the charging stations"""
+    
     def __init__(self, 
                  P_max,
                  P_min,
@@ -139,6 +141,7 @@ class EVChargeBase(MultiAgentEnv):
         self.total_timesteps = int(total_time/interval_length)
         
         self.build_random_schedule()
+        self.compute_pev_plugin()
     
     
     def step(self, action_dict):
@@ -157,14 +160,15 @@ class EVChargeBase(MultiAgentEnv):
         self.timestep = 0
         self.build_random_schedule()
         self.update_charge_stations()
-
+    
     def seed(self, seed=None):
         if seed is None:
             np.random.seed(1)
         else:
             np.random.seed(seed)
         
-        
+    
+    
 #----------------------------------------------------------------
 #----------------- Distribution in load -------------------------
 #----------------------------------------------------------------
@@ -265,17 +269,67 @@ class EVChargeBase(MultiAgentEnv):
         self.update_df()
     
     def compute_pev_plugin(self):
-        pluggled_sim = []
-
+        """
+        Creates the sequential schedule of plugged in vechiles according to the
+        specified hour of connection and disconnection of the charging station.
+        Doing so, at each timestep we know beforehand whether a ChargingStation 
+        is occupied or not. 
+        
+        Computes
+        -------
+        plug_schedule : list
+            len(plug_schedule) is the total_timesteps
+            Each element of this list is a list containing the id of the plugged-in
+            PEVs connected in a particular timestep
+        cs_schedule : list
+            Each element contains a list with n_stations elements indicating
+            whether the stations are free (-1) or occuppied, for a particular
+            timestep. It should correspond with plug_schedule.
+        """
+        plug_schedule = []
+        
         for t in range(self.total_timesteps):
-            n_plugged = 0
+            plugs = [] # Current number of plugged-in PEVs in timestep
             for pev in self.pevs:
                 if t >= pev.t_start and t <= pev.t_end:
-                    n_plugged += 1
-            pluggled_sim.append(n_plugged)
+                    plugs.append(pev.id)
+            plug_schedule.append(plugs)
             
-        self.pluggled_sim = pluggled_sim
-        self.update_df()
+        self.plugged_sim = [len(p) for p in plug_schedule]
+        self.plug_schedule = plug_schedule
+        
+        '''
+        These two pieces of code are split so they are more readable, 
+        and because plug_schedule is needed.
+        ''' 
+        
+        # cs --> Charging Station
+        cs_schedule = []
+
+        # mappings from ChargingStations to PEV ids, and viceversa
+        # -1 means
+        cs2pev = [-1]*self.n_stations # -1 means that the station is free
+        pev2cs = [-1]*self.n_pevs # -1 means that the PEV is not plugged in
+        
+        for t in range(self.total_timesteps):
+            for pev_id in range(self.n_pevs): # 
+                if pev_id in plug_schedule[t]: # Check if the PEV is plugged-in
+                    if pev2cs[pev_id] == -1: # PEV should be in, but it is not
+                        for i in range(len(cs2pev)): # Search a free station. 
+                            if cs2pev[i] == -1: # Assign to the first free station
+                                cs2pev[i] = pev_id
+                                pev2cs[pev_id] = i
+                                break # Stop searching for a free station
+                else:
+                    if pev2cs[pev_id] != -1: # If it was charging before, unplug it.
+                        cs2pev[pev2cs[pev_id]] = -1
+                        pev2cs[pev_id] = -1
+                        
+            cs_schedule.append(cs2pev.copy())
+        
+        self.cs_schedule = cs_schedule
+        
+        return plug_schedule, cs_schedule
     
     def compute_power_ideal(self):
 
@@ -334,6 +388,6 @@ class EVChargeBase(MultiAgentEnv):
         
         # Vehicles connected at the same time
         if 3 in plots:
-            assert hasattr(self,'pluggled_sim'), "Plugged-in simulation has not been performed."
+            assert hasattr(self,'plugged_sim'), "Plugged-in simulation has not been performed."
             n_plots = self.plot_ax(plots, n_plots)
-            plt.step(timesteps, self.pluggled_sim)
+            plt.step(timesteps, self.plugged_sim)
