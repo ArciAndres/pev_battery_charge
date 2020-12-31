@@ -14,43 +14,45 @@ class EVChargeEnv(EVChargeBase):
     
     def __init__(self, n_pevs, 
                        n_stations,
-                       soc_max=24,
-                       p_max=22,
-                       p_min=0, 
-                       soc_ref=24,
-                       charge_time_desired=180,
-                       initial_soc=0,
-                       xi=0.1,
-                       P_max=200,
-                       P_min=0,
-                       interval_length=5,
-                       total_time=960,
-                       initial_charge_max=0.5,
-                       initial_charge_min=0,
-                       seed=1515,
-                       charge_duration_tolerance=0.2,
-                       random_start_coeff=1,
-                       pevs=None,
+                       args, 
+                      
                        ):
         
         self.n_pevs = n_pevs
         self.n_stations = n_stations
         
+        self.p_max = args.p_max
+        self.p_min = args.p_min
+        self.soc_ref = args.soc_ref
+        self.charge_time_desired = args.charge_time_desired
+        self.initial_soc = args.initial_soc
+        self.xi = args.xi
+        self.P_max = args.P_max
+        self.P_min = args.P_min
+        self.interval_length = args.interval_length
+        self.total_time = args.total_time
+        self.initial_charge_max = args.initial_charge_max
+        self.initial_charge_min = args.initial_charge_min
+        self.seed = args.seed
+        self.charge_duration_tolerance = args.charge_duration_tolerance
+        self.random_start_coeff = args.random_start_coeff=1
+        self.pevs = args.pevs
+                       
         pevs = [PEV( ID=i,
-                     soc_max=soc_max, 
-                     xi=xi,
-                     soc=initial_soc, 
-                     charge_time_desired=charge_time_desired) for i in range(n_pevs)]
+                     soc_max=self.soc_max, 
+                     xi=self.xi,
+                     soc=self.initial_soc, 
+                     charge_time_desired=self.charge_time_desired) for i in range(n_pevs)]
         
         charge_stations = [ChargeStation(ID=i, 
-                                  p_min=p_min, 
-                                  p_max=p_max) for i in range(n_stations)]
+                                  p_min=self.p_min, 
+                                  p_max=self.p_max) for i in range(n_stations)]
         
-        load_area = LoadArea(P_max=P_max, P_min=P_min, 
+        load_area = LoadArea(P_max=self.P_max, P_min=self.P_min, 
                              charge_stations=charge_stations, 
                              pevs=pevs)
         
-        super().__init__(area=load_area)
+        super().__init__(area=load_area, args=args)
         
     def _actionSpace(self):
         return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in self.n_stations]

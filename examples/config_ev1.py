@@ -17,30 +17,27 @@ def get_config(notebook=False):
     
     # env
     parser.add_argument("--env_name", type=str, default='MPE')
-    parser.add_argument("--num_agents", type=int, default=3)
+    parser.add_argument("--num_agents", type=int, default=8)
     parser.add_argument("--share_reward", action='store_false', default=False)
     
     # PEV Charge Environment
     
-    parser.add_argument("--n_pevs", type=)
-n_pevs, 
-soc_max=24,
-p_max=22,
-p_min=0, 
-soc_ref=24,
-charge_time_desired=180,
-initial_soc=0,
-xi=0.1,
-P_max=200,
-P_min=0,
-interval_length=5,
-total_time=960,
-initial_charge_max=0.5,
-initial_charge_min=0,
-seed=1515,
-charge_duration_tolerance=0.2,
-random_start_coeff=1,
-pevs=None,
+    parser.add_argument("--n_pevs", type=int, default=20, help='Number of PEVs to schedule during training')
+    parser.add_argument("--soc_max", type=float, default=24, help='Maximum SOC capacity by PEV.')
+    parser.add_argument("--soc_ref", type=float, default=24, help='Reference SOC goal per PEV.')
+    parser.add_argument("--soc_inital", type=int, float=0, help='Initial State of Charge of PEV')
+    parser.add_argument("--p_min", type=float, default=0, help='Minimum power supply capacity by charging station.')
+    parser.add_argument("--p_max", type=float, default=22, help='Maximum power supply capacity by charging station.')
+    parser.add_argument("--charge_time_desired", type=int, default=180, help='Charge Time Desired by PEV (in minutes)')
+    parser.add_argument("--xi", type=int, float=0.1, help='PEV conversion losses.')
+    parser.add_argument("--P_min", type=float, default=0, help='Minimum power supply capacity by load area.')
+    parser.add_argument("--P_max", type=float, default=200, help='Maximum power supply capacity by load area.')
+    parser.add_argument("--sampling_time", type=int, default=5, help='Sampling time (Delta_t).')
+    parser.add_argument("--total_time", type=int, default=5, help='Total time (minutes) of the simulation.')
+    ### Parameters of random load distribution
+    parser.add_argument("--initial_charge_max", type=float, default=0.5, help='Maximum percentage of value to start charge wrt. soc_max.')
+    parser.add_argument("--charge_duration_tolerance", type=float, default=0.2, help='Tolerance on the maximum duration of the charge value.')
+    parser.add_argument("--random_start_coeff", type=float, default=1, help='To randomize the start time, from a point between it and the next random_start_coeff elements.')
     
     
     # network
