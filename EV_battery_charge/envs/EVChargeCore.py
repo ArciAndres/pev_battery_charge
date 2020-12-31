@@ -3,7 +3,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from numpy.random import random
 from EV_battery_charge.utils.utils import createDict
-from ray.rllib.env.multi_agent_env import MultiAgentEnv
+import gym
+#from ray.rllib.env.multi_agent_env import MultiAgentEnv
 
 
 class PEV():
@@ -82,6 +83,7 @@ class ChargeStation():
         self.id = ID
         self.p_min = p_min
         self.p_max = p_max
+        self.p = 0 # Initial provided power is zero.
         self.plugged = plugged
         self.soc_left = 0
         self.t_left = 0
@@ -102,7 +104,7 @@ class LoadArea():
         
         self.plug_map = { station.id: -1 for station in self.charge_stations }
 
-class EVChargeBase(MultiAgentEnv):
+class EVChargeBase(gym.Env):
     
     """
     Core class of the EVCharge environment. It handles the interaction between
@@ -137,37 +139,47 @@ class EVChargeBase(MultiAgentEnv):
         self.initial_charge_min = initial_charge_min
         self.random_start_coeff = random_start_coeff
         self.seed = seed
-        
         self.total_timesteps = int(total_time/interval_length)
         
+        self.action_space = self._actionSpace()
+        self.observation_space = self._observationSpace()
+        self.reset()
+    
+    
+    def step(self, actions: list(float)):
+        """
+        Apply power to the PEV, which will increase their SOC (if plugged-in)
+        
+        Parameters
+        ----------
+        actions : list of float
+        
+        """
+        # Apply load to the cars PEV. Update SOC. 
+        self.timestep += 1
+        
+        # for cs in self.charge_stations:
+        #     cs
+                
+        observation = self._computeObservation()
+        reward = self._computeReward()
+        info = self._computeInfo()
+        done = self._computeDone()
+        
+        self.update_charge_stations() # Plugs or unplugs vehicles depending on t
+        
+        
+    def reset(self):
+        self.timestep = 0
+        self.seed()
         self.build_random_schedule()
         self.compute_pev_plugin()
     
-    
-    def step(self, action_dict):
-        
-        # Apply load to the cars PEV. Update SOC. 
-        self.timestep += 1
-                
-        self._computeReward()
-        self._computeObservation()
-        self._computeInfo()
-        self._computeDone()
-        
-        self.update_charge_stations() # Plugs or unplugs vehicles depending on t
-    
-    def reset(self):
-        self.timestep = 0
-        self.build_random_schedule()
-        self.update_charge_stations()
-    
-    def seed(self, seed=None):
-        if seed is None:
+    def seed(self):
+        if self.seed is None:
             np.random.seed(1)
         else:
-            np.random.seed(seed)
-        
-    
+            np.random.seed(self.seed)
     
 #----------------------------------------------------------------
 #----------------- Distribution in load -------------------------
@@ -267,6 +279,10 @@ class EVChargeBase(MultiAgentEnv):
             pev.Y = [pev.p_charge_rate*x_ + b for x_ in pev.X]
         
         self.update_df()
+
+#-----------------------------------------------------------
+#---------------- Compute Plug-in Schedule -----------------
+#-----------------------------------------------------------
     
     def compute_pev_plugin(self):
         """

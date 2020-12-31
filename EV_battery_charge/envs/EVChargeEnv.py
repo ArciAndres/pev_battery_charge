@@ -53,28 +53,15 @@ class EVChargeEnv(EVChargeBase):
         super().__init__(area=load_area)
         
     def _actionSpace(self):
-        
-        '''
-        Return the action space of the environment, a Dict of Box(4,) with NUM_DRONES entries 
-        '''
-        
-        #### Action vector ######## P0            P1            P2            P3
-        act_lower_bound = np.array([-1,           -1,           -1,           -1])
-        act_upper_bound = np.array([1,            1,            1,            1])
-        
-        return spaces.Dict({ str(i): spaces.Box(low=act_lower_bound, high=act_upper_bound, dtype=np.float32) for i in range(self.NUM_DRONES) })
-
-    ####################################################################################################
-    #### Return the observation space of the environment, a Dict with NUM_DRONES entries of Dict of ####
-    #### { Box(4,), MultiBinary(NUM_DRONES) } ##########################################################
-    ####################################################################################################
+        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in self.n_stations]
+    
     def _observationSpace(self):
-        #### Observation vector ### X        Y        Z       Q1   Q2   Q3   Q4   R       P       Y       VX       VY       VZ       WR       WP       WY       P0            P1            P2            P3
-        obs_lower_bound = np.array([-1,      -1,      0,      -1,  -1,  -1,  -1,  -1,     -1,     -1,     -1,      -1,      -1,      -1,      -1,      -1,      -1,           -1,           -1,           -1])
-        obs_upper_bound = np.array([1,       1,       1,      1,   1,   1,   1,   1,      1,      1,      1,       1,       1,       1,       1,       1,       1,            1,            1,            1])
-        return spaces.Dict({ str(i): spaces.Dict ({"state": spaces.Box(low=obs_lower_bound, high=obs_upper_bound, dtype=np.float32),
-                                                    "neighbors": spaces.MultiBinary(self.NUM_DRONES) }) for i in range(self.NUM_DRONES) })
-
+        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in self.n_stations]
+    
+    def _preprocessAction(self, actions):
+        # Here we could clip or normalize. 
+        return actions
+    
     def _computeReward(self):
         raise NotImplementedError()
         
