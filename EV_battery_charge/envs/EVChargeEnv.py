@@ -67,8 +67,6 @@ class EVChargeEnv(EVChargeBase):
         
         rewards = []
         
-        
-        
         for cs in self.charge_stations:
             rew = [0]*5
             if cs.plugged:
