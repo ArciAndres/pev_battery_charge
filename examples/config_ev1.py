@@ -28,7 +28,7 @@ def get_config(notebook=False):
     parser.add_argument("--soc_initial", type=float, default=0, help='Initial State of Charge of PEV')
     parser.add_argument("--p_min", type=float, default=0, help='Minimum power supply capacity by charging station.')
     parser.add_argument("--p_max", type=float, default=22, help='Maximum power supply capacity by charging station.')
-    parser.add_argument("--charge_time_desired", type=int, default=180, help='Charge Time Desired by PEV (in minutes)')
+    parser.add_argument("-ctd", "--charge_time_desired", type=int, default=180, help='Charge Time Desired by PEV (in minutes)')
     parser.add_argument("--xi", type=float, default=0.1, help='PEV conversion losses.')
     parser.add_argument("--P_min", type=float, default=0, help='Minimum power supply capacity by load area.')
     parser.add_argument("--P_max", type=float, default=200, help='Maximum power supply capacity by load area.')
@@ -38,6 +38,9 @@ def get_config(notebook=False):
     parser.add_argument("--initial_charge_max", type=float, default=0.5, help='Maximum percentage of value to start charge wrt. soc_max.')
     parser.add_argument("--charge_duration_tolerance", type=float, default=0.2, help='Tolerance on the maximum duration of the charge value.')
     parser.add_argument("--random_start_coeff", type=float, default=1, help='To randomize the start time, from a point between it and the next random_start_coeff elements.')
+    # reward weights. Pass as (example): -rw 1 1 0.5 1 3
+    parser.add_argument("-rw", "--reward_weights", nargs=3, default=[1,1,1], \
+    help='Weights for reward components. 0: Penalize on remaining SOC. 1: Surpassing local limit. 2: Surpassing global limit.')
     
     
     # network

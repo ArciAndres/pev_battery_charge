@@ -27,6 +27,7 @@ class EVChargeEnv(EVChargeBase):
         self.P_max = args.P_max
         self.P_min = args.P_min
         self.seed = args.seed
+        self.rew_weights = args.reward_weights
                        
         pevs = [PEV( ID=i,
                      soc_max=self.soc_max,
@@ -60,7 +61,7 @@ class EVChargeEnv(EVChargeBase):
         rewards = []
         
         for cs in self.charge_stations:
-            rew = [0]*5
+            rew = [0]*len(self.rew_weights)
             if cs.plugged:
                 pev = self.pevs[cs.pev_id]
                 
@@ -80,6 +81,8 @@ class EVChargeEnv(EVChargeBase):
             
             rewards.append(sum(reward))                
         
+        return rewards
+    
     def _computeObservation(self):
         """
         Consider that the agents are the charging stations.
@@ -106,10 +109,12 @@ class EVChargeEnv(EVChargeBase):
         
         
     def _computeInfo(self):
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        return -1
     
     def _computeDone(self):
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        return -1
         
          
         

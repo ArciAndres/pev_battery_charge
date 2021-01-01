@@ -51,6 +51,13 @@ class PEV():
         self.t_start = t_start
         self.t_end = t_end
         
+    def SOC_update(self, power_in, delta_t):
+        
+        self.soc += (1 - self.xi)*delta_t*power_in
+        
+        if self.soc > self.soc_max: # Cannot charge more if complete. 
+                self.soc = self.soc_max
+
 class ChargeStation():
     ''' 
     Charge station class. 
@@ -151,9 +158,9 @@ class EVChargeBase(gym.Env):
         P = 0 # Total Power of the load area
         for cs, action in zip(self.charge_stations, actions):
             cs.p = action
-            pev = self.pevs[self.cs_schedule[self.timestep][cs.id]]
+            pev_id = self.cs_schedule[self.timestep][cs.id]
+            self.pevs[pev_id].SOC_update(cs.p, self.sampling_time)
             
-            pev.soc += (1 - pev.xi)*self.sampling_time*cs.p
             P += cs.p
         
         self.area.P = P
