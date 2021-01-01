@@ -4,7 +4,7 @@ def get_config(notebook=False):
     # notebook variable allows the configuration to be imported in a jupyter notebook, ignoring command line parameters
 
     # get the parameters
-    parser = argparse.ArgumentParser(description='EVBattery-sc.')
+    parser = argparse.ArgumentParser(description='PEV Battery Charging multi-agent environment.')
 
     # prepare
     parser.add_argument("--algorithm_name", type=str, default='mappo_gru')

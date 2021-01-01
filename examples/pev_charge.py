@@ -7,13 +7,13 @@ Created on Tue Oct 20 19:46:43 2020
 #%matplotlib inline
 
 import numpy as np
-from EV_battery_charge.envs.EVBatteryCharge import EVBatteryCharge
+from pev_battery_charge.envs.PEVBatteryCharge import PEVBatteryCharge
 from pdb import set_trace
-from config_ev1 import get_config 
+from config_pev import get_config 
 
 config = get_config(notebook=True)
 #%%
-env = EVBatteryCharge(args=config)
+env = PEVBatteryCharge(args=config)
 
 #%%
 env.build_random_schedule()

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from numpy.random import random
-from EV_battery_charge.utils.utils import createDict
+from pev_battery_charge.utils.utils import createDict
 import gym
 #from ray.rllib.env.multi_agent_env import MultiAgentEnv
 
@@ -111,7 +111,7 @@ class LoadArea():
         self.pevs = pevs
         self.P = 0        
 
-class EVChargeBase(gym.Env):
+class PEVChargeBase(gym.Env):
     
     """
     Core class of the EVCharge environment. It handles the interaction between

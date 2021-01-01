@@ -1,4 +1,4 @@
-# Electric Vehicles (EV) Battery Charging Management
+# Plug-in Electric Vehicles (PEV) Battery Charging Management
 
 ## Elements
 

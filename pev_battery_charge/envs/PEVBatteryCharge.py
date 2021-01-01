@@ -1,8 +1,8 @@
 import numpy as np
-from EV_battery_charge.envs.EVChargeCore import PEV, ChargeStation, EVChargeBase, LoadArea
+from pev_battery_charge.envs.PEVChargeCore import PEV, ChargeStation, PEVChargeBase, LoadArea
 from gym import spaces
 
-class PEVBatteryCharge(EVChargeBase):
+class PEVBatteryCharge(PEVChargeBase):
     '''
     Plug-in Electric Vehicle Charing environment. 
     A simulation of a charging station as a multi-agent system.
