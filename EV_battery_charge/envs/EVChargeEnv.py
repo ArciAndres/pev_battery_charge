@@ -45,10 +45,10 @@ class EVChargeEnv(EVChargeBase):
         super().__init__(args=args)
         
     def _actionSpace(self):
-        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
+        return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
     
     def _observationSpace(self):
-        return [ spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
+        return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
     
     def _preprocessAction(self, actions):
         # Here we could clip 

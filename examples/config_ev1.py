@@ -33,7 +33,7 @@ def get_config(notebook=False):
     parser.add_argument("--P_min", type=float, default=0, help='Minimum power supply capacity by load area.')
     parser.add_argument("--P_max", type=float, default=200, help='Maximum power supply capacity by load area.')
     parser.add_argument("--sampling_time", type=int, default=5, help='Sampling time (Delta_t).')
-    parser.add_argument("--total_time", type=int, default=5, help='Total time (minutes) of the simulation.')
+    parser.add_argument("--total_time", type=int, default=960, help='Total time (minutes) of the simulation.')
     ### Parameters of random load distribution
     parser.add_argument("--initial_charge_max", type=float, default=0.5, help='Maximum percentage of value to start charge wrt. soc_max.')
     parser.add_argument("--charge_duration_tolerance", type=float, default=0.2, help='Tolerance on the maximum duration of the charge value.')

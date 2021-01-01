@@ -51,9 +51,6 @@ class PEV():
         self.t_start = t_start
         self.t_end = t_end
         
-    def SOC_update(self, p):
-        self.soc += (1 - self.xi)*self.sampling_time*p
-        
 class ChargeStation():
     ''' 
     Charge station class. 
@@ -124,7 +121,6 @@ class EVChargeBase(gym.Env):
         # This distribution of connections will put the agents across the total time, 
         # in an ordered pseudo random fashion
         
-        self.n_pevs = len(self.area.pevs)
         self.pevs = self.area.pevs
         self.charge_stations = self.area.charge_stations
         self.sampling_time = args.sampling_time
@@ -155,8 +151,9 @@ class EVChargeBase(gym.Env):
         P = 0 # Total Power of the load area
         for cs, action in zip(self.charge_stations, actions):
             cs.p = action
-            pev_id = self.cs_schedule[self.timestep][cs.id]
-            self.pevs[pev_id].SOC_update(cs.p)
+            pev = self.pevs[self.cs_schedule[self.timestep][cs.id]]
+            
+            pev.soc += (1 - pev.xi)*self.sampling_time*cs.p
             P += cs.p
         
         self.area.P = P
@@ -182,7 +179,6 @@ class EVChargeBase(gym.Env):
     
     def reset(self):
         self.timestep = 0
-        self._seed()
         self.build_random_schedule()
         self.compute_pev_plugin()
     
@@ -205,7 +201,7 @@ class EVChargeBase(gym.Env):
         schedule is provided.         
         """
         
-        np.random.seed(self.seed)
+        #np.random.seed(10)
         
         # charge_samples = charge_duration_max/sampling_time
         # total_timesteps_start = total_timesteps-charge_samples # Allowed start sample. 
