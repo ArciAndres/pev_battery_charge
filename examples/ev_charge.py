@@ -7,13 +7,13 @@ Created on Tue Oct 20 19:46:43 2020
 #%matplotlib inline
 
 import numpy as np
-from EV_battery_charge.envs.EVChargeEnv import EVChargeEnv
+from EV_battery_charge.envs.EVBatteryCharge import EVBatteryCharge
 from pdb import set_trace
 from config_ev1 import get_config 
 
 config = get_config(notebook=True)
 #%%
-env = EVChargeEnv(args=config)
+env = EVBatteryCharge(args=config)
 
 #%%
 env.build_random_schedule()
@@ -26,7 +26,7 @@ env.plot_simulation(plots=[1,2,3])
 
 actions = [space.sample() for space in env.action_space]
 
-set_trace()
+#set_trace()
 obs, rewards, info, done =  env.step(actions)
 
 #%%
