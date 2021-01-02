@@ -163,7 +163,7 @@ class PEVChargeBase(gym.Env):
             
             P += cs.p
         
-        self.area.P = P[0]
+        self.area.P = P
         
         # The variables are saved in the environment for debugging purposes. 
         self.observation = self._computeObservation()
@@ -288,7 +288,10 @@ class PEVChargeBase(gym.Env):
             pev.X = [t for t in range(int(pev.t_start), int(pev.t_end+1), 1)]
             
             # m is the slope of the straight line. It is a measure of power in [kW]
-            pev.p_charge_rate = (pev.soc_ref - pev.soc)/(pev.t_end - pev.t_start) / self.sampling_time * 60
+            def st2h(st): # Sampling time to hour
+                return st * self.sampling_time / 60
+            
+            pev.p_charge_rate = (pev.soc_ref - pev.soc)/(pev.t_end - pev.t_start)
             b = pev.soc - pev.p_charge_rate * pev.t_start
             pev.Y = [pev.p_charge_rate*x_ + b for x_ in pev.X]
         

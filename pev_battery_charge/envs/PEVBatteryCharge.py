@@ -53,7 +53,7 @@ class PEVBatteryCharge(PEVChargeBase):
     
     def _preprocessAction(self, actions):
         # Here we could clip 
-        return actions
+        return [action[0] for action in actions]
     
     def _computeReward(self):
         """ Reward has multiple weights and penalizations. """
@@ -110,7 +110,7 @@ class PEVBatteryCharge(PEVChargeBase):
         
     def _computeInfo(self):
         #raise NotImplementedError()
-        return -1
+        return {"timestep: ", self.timestep, ""}
     
     def _computeDone(self):
         #raise NotImplementedError()
