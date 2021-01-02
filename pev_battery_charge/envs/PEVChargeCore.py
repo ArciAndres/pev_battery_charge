@@ -163,7 +163,7 @@ class PEVChargeBase(gym.Env):
             
             P += cs.p
         
-        self.area.P = P
+        self.area.P = P[0]
         
         # The variables are saved in the environment for debugging purposes. 
         self.observation = self._computeObservation()

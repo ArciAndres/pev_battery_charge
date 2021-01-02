@@ -26,7 +26,7 @@ env.plot_simulation(plots=[1,2,3])
 
 actions = [space.sample() for space in env.action_space]
 
-#set_trace()
+set_trace()
 obs, rewards, info, done =  env.step(actions)
 
 #%%
