@@ -9,12 +9,13 @@ Created on Tue Oct 20 19:46:43 2020
 import numpy as np
 from pev_battery_charge.envs.PEVBatteryCharge import PEVBatteryCharge
 from pdb import set_trace
-from pev_battery_charge.envs.config_pev import get_config 
+from pev_battery_charge.envs.config_pev import get_config
 
 config = get_config(notebook=True)
+config.num_agents = 4
 #%%
 
-config.n_pevs = 30
+config.n_pevs = 10
 
 env = PEVBatteryCharge(args=config)
 
@@ -31,7 +32,7 @@ from time import sleep
 from matplotlib import pyplot as plt
 
 for _ in range(10):
-    sleep(1)
+    #sleep(1)
     env.build_random_schedule()
     env.compute_greedy_charge()
     env.compute_power_ideal()
@@ -43,8 +44,6 @@ for _ in range(10):
 actions = [space.sample() for space in env.action_space]
 
 #set_trace()
-
-
 
 obs, rewards, info, done =  env.step(actions)
 
