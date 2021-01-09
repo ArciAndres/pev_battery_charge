@@ -17,7 +17,7 @@ def get_config(notebook=False):
     
     # env
     parser.add_argument("--env_name", type=str, default='BatteryCharge')
-    parser.add_argument("--env_name", type=str, default='PEVChargeSchedule')
+    parser.add_argument("--scenario_name", type=str, default='PEVChargeSchedule')
     parser.add_argument("--num_agents", type=int, default=20, help='Number of PEVs to schedule during training')
     parser.add_argument("--share_reward", action='store_false', default=False)
     
