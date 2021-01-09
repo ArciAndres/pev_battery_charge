@@ -28,7 +28,7 @@ class PEVBatteryCharge(PEVChargeBase):
         self.P_min = args.P_min
         self.seed = args.seed
         self.rew_weights = args.reward_weights
-                       
+        
         pevs = [PEV( ID=i,
                      soc_max=self.soc_max,
                      xi=self.xi,

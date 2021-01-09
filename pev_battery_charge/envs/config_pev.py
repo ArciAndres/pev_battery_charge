@@ -16,7 +16,8 @@ def get_config(notebook=False):
     parser.add_argument("--num_env_steps", type=int, default=10e6, help='number of environment steps to train (default: 10e6)') 
     
     # env
-    parser.add_argument("--env_name", type=str, default='MPE')
+    parser.add_argument("--env_name", type=str, default='BatteryCharge')
+    parser.add_argument("--env_name", type=str, default='PEVChargeSchedule')
     parser.add_argument("--num_agents", type=int, default=20, help='Number of PEVs to schedule during training')
     parser.add_argument("--share_reward", action='store_false', default=False)
     
