@@ -78,9 +78,12 @@ class PEVBatteryCharge(PEVChargeBase):
                     rew[2] = (-1)
             
             reward = np.array(rew)*self.rew_weights
-            
-            rewards.append(sum(reward))                
+            rew = sum(rewards)
+            self.info_rewards = { ("rew%d"%i) : rewards[i] for i in range(len(rewards)) }
         
+            rewards.append(sum(reward))  
+        
+        rewards = [[r] for r in rewards] ## Added to match the array size in training
         return rewards
     
     def _computeObservation(self):
