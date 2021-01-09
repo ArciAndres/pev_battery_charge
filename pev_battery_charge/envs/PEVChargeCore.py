@@ -315,7 +315,7 @@ class PEVChargeBase(gym.Env):
             Each element of this list is a list containing the id of the plugged-in
             PEVs connected in a particular timestep
         cs_schedule : list
-            Each element contains a list with n_stations elements indicating
+            Each element contains a list with num_agents elements indicating
             whether the stations are free (-1) or occuppied, for a particular
             timestep. It should correspond with plug_schedule.
         """
@@ -342,7 +342,7 @@ class PEVChargeBase(gym.Env):
 
         # mappings from ChargingStations to PEV ids, and viceversa
         # -1 means
-        cs2pev = [-1]*self.n_stations # -1 means that the station is free
+        cs2pev = [-1]*self.num_agents # -1 means that the station is free
         pev2cs = [-1]*self.n_pevs # -1 means that the PEV is not plugged in
         
         for t in range(self.total_timesteps):

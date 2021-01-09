@@ -15,7 +15,7 @@ class PEVBatteryCharge(PEVChargeBase):
     def __init__(self, args):
         
         self.n_pevs = args.n_pevs
-        self.n_stations = args.num_agents
+        self.num_agents = args.num_agents
         
         self.p_max = args.p_max
         self.p_min = args.p_min
@@ -37,7 +37,7 @@ class PEVBatteryCharge(PEVChargeBase):
         
         charge_stations = [ChargeStation(ID=i, 
                                   p_min=self.p_min, 
-                                  p_max=self.p_max) for i in range(self.n_stations)]
+                                  p_max=self.p_max) for i in range(self.num_agents)]
         
         self.area = LoadArea(P_max=self.P_max, P_min=self.P_min, 
                              charge_stations=charge_stations, 
@@ -46,10 +46,10 @@ class PEVBatteryCharge(PEVChargeBase):
         super().__init__(args=args)
         
     def _actionSpace(self):
-        return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
+        return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.num_agents)]
     
     def _observationSpace(self):
-        return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.n_stations)]
+        return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.num_agents)]
     
     def _preprocessAction(self, actions):
         # Here we could clip 

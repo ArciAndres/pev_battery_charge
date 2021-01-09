@@ -17,7 +17,7 @@ def get_config(notebook=False):
     
     # env
     parser.add_argument("--env_name", type=str, default='MPE')
-    parser.add_argument("--num_agents", type=int, default=8)
+    parser.add_argument("--num_agents", type=int, default=20, help='Number of PEVs to schedule during training')
     parser.add_argument("--share_reward", action='store_false', default=False)
     
     # PEV Charge Environment
