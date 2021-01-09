@@ -110,11 +110,10 @@ class PEVBatteryCharge(PEVChargeBase):
         
     def _computeInfo(self):
         #raise NotImplementedError()
-        return {"timestep: ", self.timestep, ""}
+        return {"timestep: ": self.timestep}
     
     def _computeDone(self):
         #raise NotImplementedError()
-        return -1
-        
+        return [-1]*self.num_agents        
          
         
