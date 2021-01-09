@@ -49,7 +49,7 @@ class PEVBatteryCharge(PEVChargeBase):
         return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.num_agents)]
     
     def _observationSpace(self):
-        return [ spaces.Box(low=0, high=np.inf, shape=(1,), dtype=np.float32) for _ in range(self.num_agents)]
+        return [ spaces.Box(low=0, high=np.inf, shape=(7,), dtype=np.float32) for _ in range(self.num_agents)]
     
     def _preprocessAction(self, actions):
         # Here we could clip 

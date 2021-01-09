@@ -18,12 +18,12 @@ def get_config(notebook=False):
     # env
     parser.add_argument("--env_name", type=str, default='BatteryCharge')
     parser.add_argument("--scenario_name", type=str, default='PEVChargeSchedule')
-    parser.add_argument("--num_agents", type=int, default=20, help='Number of PEVs to schedule during training')
+    parser.add_argument("--num_agents", type=int, default=4, help='Number of PEVs to schedule during training')
     parser.add_argument("--share_reward", action='store_false', default=False)
     
     # PEV Charge Environment
     
-    parser.add_argument("--n_pevs", type=int, default=20, help='Number of PEVs to schedule during training')
+    parser.add_argument("--n_pevs", type=int, default=10, help='Number of PEVs to schedule during training')
     parser.add_argument("--soc_max", type=float, default=24, help='Maximum SOC capacity by PEV.')
     parser.add_argument("--soc_ref", type=float, default=24, help='Reference SOC goal per PEV.')
     parser.add_argument("--soc_initial", type=float, default=0, help='Initial State of Charge of PEV')
