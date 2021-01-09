@@ -188,12 +188,16 @@ class PEVChargeBase(gym.Env):
         self.timestep = 0
         self.build_random_schedule()
         self.compute_pev_plugin()
+        self.observation = self._computeObservation()
+        
+        return self.observation, []
     
-    def _seed(self):
+    def set_seed(self, seed):
+        self.seed = seed
         if self.seed is None:
             np.random.seed(1)
         else:
-            np.random.seed(self.seed)
+            np.random.seed(seed)
     
 #----------------------------------------------------------------
 #----------------- Distribution in load -------------------------
