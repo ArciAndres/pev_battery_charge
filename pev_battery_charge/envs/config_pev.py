@@ -93,7 +93,7 @@ def get_config(notebook=False):
     parser.add_argument("--huber_delta", type=float, default=10.0)   
     
     # replay buffer
-    parser.add_argument("--episode_length", type=int, default=25, help='number of forward steps in A2C (default: 5)')
+    parser.add_argument("--episode_length", type=int, default=190, help='number of forward steps in A2C (default: 5)')
 
     # run
     parser.add_argument("--use-linear-lr-decay", action='store_true', default=False, help='use a linear schedule on the learning rate')
@@ -112,7 +112,7 @@ def get_config(notebook=False):
     parser.add_argument("--eval_episodes", type=int, default=32)
     
     # render
-    parser.add_argument("--save_gifs", action='store_true', default=True)
+    parser.add_argument("--save_gifs", action='store_true', default=False)
     parser.add_argument("--save_gifs_interval", type=int, default=200)
 
     parser.add_argument("--ifi", type=float, default=0.333333)

@@ -153,6 +153,7 @@ class PEVChargeBase(gym.Env):
         """
         # Apply load to the cars PEV. Update SOC. 
         
+        self.actions_last = actions        
         actions = self._preprocessAction(actions)
         
         P = 0 # Total Power of the load area

@@ -28,6 +28,7 @@ class PEVBatteryCharge(PEVChargeBase):
         self.P_min = args.P_min
         self.seed = args.seed
         self.rew_weights = args.reward_weights
+        self.actions_last = [[0] for _ in range(self.num_agents)]
         
         pevs = [PEV( ID=i,
                      soc_max=self.soc_max,
@@ -106,7 +107,8 @@ class PEVBatteryCharge(PEVChargeBase):
                                  cs.plugged, 
                                  soc_remain,
                                  timesteps_remaining, 
-                                 self.area.P])
+                                 self.area.P,
+                                 self.actions_last[cs.id][0]])
         
         return observations
         
