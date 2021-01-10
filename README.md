@@ -30,7 +30,7 @@ pip install -e .
 
 The environment is designed as a continuous Partially Observable Markov Decision Process (POMDP), where the agents (CS) are connected to a general load area with a fixed maximum supply power allowed. The PEVs are entities that get plugged in to the CSs with a requirement of energy load to be provided within a certain amount of time. 
 
-![LoadAreaFig](D:\GoogleDrive\MasterTemp\pev_battery_charge_GIT\media\LoadAreaFig.svg)
+![LoadAreaFig](media/LoadAreaFig.svg)
 
 ### Observation space
 
@@ -51,5 +51,48 @@ For each agent, it is `Box(0, np.inf, (8,))` space, formed by the following elem
 
 For each agent, it is a single continuous value space `Box(0, p_max, (1,))`, where `p_max` corresponds to the maximum available power for this agent. 
 
+### Rewards
+
+It is designed as a sum of multiple conditions: The remaining SOC, the surpassing on local limits and global limits. The weight of each one can be tuned on the `config_pev.py` file. 
+
+```python
+def _computeReward(self):
+    """ Reward has multiple weights and penalizations. """
+    
+    rewards = []
+    for cs in self.charge_stations:
+        rew = [0]*len(self.rew_weights)
+        if cs.plugged:
+            pev = self.pevs[cs.pev_id]
+            
+            # Penalization on remaining SOC
+            soc_remain = pev.soc - pev.soc_ref
+            rew[0] = soc_remain/self.soc_ref # Normalized on the reference, not max
+            
+            # Penalization surpassing local limit
+            if cs.p > cs.p_max or cs.p < cs.p_min:
+                rew[1] = (-1)
+            
+            # Penalization surpassing global limit
+            if self.area.P > self.area.P_max or self.area.P < self.area.P_min:
+                rew[2] = (-1)
+        
+        reward = np.array(rew)*self.rew_weights
+        rew = sum(rewards)
+        self.info_rewards = { ("rew%d"%i) : rewards[i] for i in range(len(rewards)) }
+    
+        rewards.append(sum(reward))  
+    
+    rewards = [[r] for r in rewards] ## Added to match the array size in training
+    return rewards
+```
 ## Schedule generation
+
+During simulation, with the `reset` method, a new case study is generated, depending on the parameters provided by the `config_pev.py` file. Below it is depicted a greedy loading example of 10 and 30 vehicles, in a timespan of 16 hours (960 minutes) with a sampling time ($\Delta t$) of 5 minutes, which gives 192 samples in total. In the upper charts it is shown a linear charge of the vehicles' batteries (without considering any global limits), and below the number of simultaneous vehicles connected to the charging stations at $t$ timestep. 
+
+|                     10 Plug-in vehicles                      |                     30 Plug-in vehicles                      |
+| :----------------------------------------------------------: | :----------------------------------------------------------: |
+| <img src="media/10_pev_env.gif" alt="10_pev_env" style="zoom: 80%;" /> | <img src="media/30_pev_env.gif" alt="30_pev_env" style="zoom: 80%;" /> |
+
+
 
