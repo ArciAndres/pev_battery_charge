@@ -167,7 +167,7 @@ class PEVChargeBase(gym.Env):
         self.area.P = P
         
         # The variables are saved in the environment for debugging purposes. 
-        self.observation = self._computeObservation()
+        self.obs = self._computeObservation()
         self.reward = self._computeReward()
         self.info = self._computeInfo()
         self.done = self._computeDone()
@@ -175,7 +175,7 @@ class PEVChargeBase(gym.Env):
         self.schedule_step() # Plugs or unplugs vehicles depending on t
         self.timestep += 1
         
-        return self.observation, self.reward, self.done, self.info, []
+        return self.obs, self.reward, self.done, self.info, []
         
     def schedule_step(self):
         """ Synchronize the schedule with the values in the Charging Stations """
@@ -189,9 +189,9 @@ class PEVChargeBase(gym.Env):
         self.timestep = 0
         self.build_random_schedule()
         self.compute_pev_plugin()
-        self.observation = self._computeObservation()
+        self.obs = self._computeObservation()
         
-        return self.observation, []
+        return self.obs, []
     
     def set_seed(self, seed):
         self.seed = seed
