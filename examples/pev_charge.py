@@ -13,7 +13,8 @@ from pev_battery_charge.envs.config_pev import get_config
 from matplotlib import pyplot as plt
 from time import sleep
 config = get_config(notebook=True)
-
+config.num_agents = 6
+config.n_pevs = 20
 #set_trace()
 env = PEVBatteryCharge(args=config)
 
@@ -47,9 +48,9 @@ obs
 #%%
 
 obs = env.reset()
-for _ in range(env.total_timesteps):
+for _ in range(env.total_timesteps-1):
     sleep(0.01)
-    actions = [space.sample() for space in env.action_space]
+    actions = [space.sample()*0.2 for space in env.action_space]
     
     #set_trace()
     obs, rewards, done, info, [] =  env.step(actions)
@@ -59,7 +60,7 @@ for _ in range(env.total_timesteps):
     actions_last = [0 if -1 == plug_pevs[i] else a for i, a in enumerate(env.actions_last)]
     
     
-    plt.rcParams['figure.figsize'] = [8, 5*2.5]
+    plt.rcParams['figure.figsize'] = [12, 5*2.8]
     plt.figure('BatteryCharge')
 
     # Charge bars of the charging stations    
@@ -69,8 +70,18 @@ for _ in range(env.total_timesteps):
     plt.subplot(3,1,1)
     p1 = plt.bar(ind, actions_last, width=0.35, )
     
-    plt.ylim(0,3)
-    plt.xticks(ind, ['CS%d (%d)'%(i, plug_pevs[i]) for i in range(env.num_agents)])
+    plt.ylim(0,1)
+    
+    xticks = []
+    for i in range(env.num_agents):
+        xtick = 'CS%d ' %i
+        if plug_pevs[i] == -1:
+            xtick += '(-1)'
+        else:
+            xtick += '(EV%d)' % plug_pevs[i]
+        xticks.append(xtick)
+    
+    plt.xticks(ind, xticks)
     
     
     # Plot Gannt-like diagram
