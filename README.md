@@ -30,7 +30,13 @@ pip install -e .
 
 The environment is designed as a continuous Partially Observable Markov Decision Process (POMDP), where the agents (CS) are connected to a general load area with a fixed maximum supply power allowed. The PEVs are entities that get plugged in to the CSs with a requirement of energy load to be provided within a certain amount of time. 
 
-![LoadAreaFig](media/LoadAreaFig.svg)
+|       Environment graphic setup       |
+| :-----------------------------------: |
+| ![LoadAreaFig](media/LoadAreaFig.svg) |
+
+
+
+
 
 ### Observation space
 
