@@ -113,7 +113,7 @@ class PEVBatteryCharge(PEVChargeBase):
                                  soc_remain,
                                  #timesteps_remaining, 
                                  self.area.P,
-                                 self.actions_last[cs.id][0]])
+                                 self.actions_last[cs.id]])
         
         return observations
         

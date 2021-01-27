@@ -452,3 +452,10 @@ class PEVChargeBase(gym.Env):
             assert hasattr(self,'plugged_sim'), "Plugged-in simulation has not been performed."
             n_plots = self.plot_ax(plots, n_plots)
             plt.step(timesteps, self.plugged_sim)
+    
+    def render(self, animation=False, plots=[], mode='human'):
+        
+        
+        
+        
+        raise NotImplementedError()
