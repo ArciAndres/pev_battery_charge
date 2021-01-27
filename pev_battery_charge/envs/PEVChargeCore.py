@@ -201,6 +201,7 @@ class PEVChargeBase(gym.Env):
 
     def update_history(self):
         self.hist['area_P'][self.timestep] = self.area.P
+        self.hist['actions'][self.timestep] = self.actions_last
         
     def reset(self):
         self.timestep = 0
@@ -208,7 +209,8 @@ class PEVChargeBase(gym.Env):
         self.compute_pev_plugin()
         self.schedule_step()
         self.obs = self._computeObservation()
-        self.hist = {'area_P' : [0]*self.total_timesteps}
+        self.hist = {'area_P' : [0]*self.total_timesteps, 
+                     'actions' : [0]*self.total_timesteps}
         
         
         return self.obs, []
@@ -413,14 +415,15 @@ class PEVChargeBase(gym.Env):
         
     def plot_common(self):
         # Add grid and limits the X axis in corresponding samples. 
-        plt.grid(True)
         plt.xlim([0, self.total_timesteps]) 
         
-    def plot_ax(self, plots, n_plots):
+    def plot_ax(self, plots, n_plots, timesteps=False, grid=True):
         n_plots += 1
         plt.subplot(len(plots),1,n_plots)
-        
-        self.plot_common()
+        if timesteps:
+            self.plot_common()
+        if grid:
+            plt.grid(True)
         return n_plots
         
     def plot_simulation(self, plots=[1,2,3]):
@@ -454,8 +457,30 @@ class PEVChargeBase(gym.Env):
             plt.step(timesteps, self.plugged_sim)
     
     def render(self, animation=False, plots=[], mode='human'):
+        figlabel = "Simulation PEV Charge"
+        if figlabel in plt.get_figlabels():    
+            plt.close(figlabel)
         
+        plt.rcParams['figure.figsize'] = [10, 5*len(plots)]
+        plt.figure(figlabel)
         
+        n_plots = 0
+        timesteps = [i for i in range(self.total_timesteps)]
         
-        
-        raise NotImplementedError()
+        #================ 1. Current power bars ===================
+        if 1 in plots:
+            ind = [n for n in range(self.num_agents)]
+            n_plots = self.plot_ax(plots, n_plots)
+            plt.bar(ind, self.actions_last, width=0.35)
+            plug_pevs = self.cs_schedule[self.timestep]
+            
+            plt.ylim(0,1)
+            # Configure the name of the ticks in X
+            xticks = []
+            for i in range(self.num_agents):
+                xtick = 'CS%d ' %i
+                if plug_pevs[i] == -1: xtick += '(-1)'
+                else: xtick += '(EV%d)' % plug_pevs[i]
+            
+                xticks.append(xtick)
+            plt.xticks(ind, xticks)
