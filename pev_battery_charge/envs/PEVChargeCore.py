@@ -52,7 +52,10 @@ class PEV():
         self.t_end = t_end
         
     def SOC_update(self, power_in, delta_t):
-        
+        '''
+        power_in -> [kW]
+        '''
+        delta_t = delta_t/60 # In hours, not minutes
         self.soc += (1 - self.xi)*delta_t*power_in
         
         if self.soc > self.soc_max: # Cannot charge more if complete. 
@@ -487,18 +490,17 @@ class PEVChargeBase(gym.Env):
                 xticks.append(xtick)
             plt.xticks(ind, xticks)
             
-        #============ 2. Gannt-like diagram ===================
+        #============== 2. Gannt-like diagram =================
         if 2 in plots:
-            n_plots = self.plot_ax(plots, n_plots)
+            n_plots = self.plot_ax(plots, n_plots, timesteps=True)
             for pev in self.pevs:
                 plt.broken_barh([(pev.t_start, pev.t_end - pev.t_start)], (pev.id-0.25,0.5))
             
             plt.axvline(x=self.timestep, color='y')
             plt.yticks(pev_index, pev_names)
             plt.ylim(-2,self.n_pevs+1)
-            plt.xlim(0,self.total_timesteps)
             
-        #======= 3. SOC vehicles (Battery state) ==============
+        #========== 3. SOC vehicles (Battery state) ===========
         if 3 in plots:
             n_plots = self.plot_ax(plots, n_plots)
             socs = [pev.soc for pev in self.pevs]
@@ -510,6 +512,14 @@ class PEVChargeBase(gym.Env):
             plt.xticks(pev_index, pev_names)
             soc_ref_max = max([pev.soc_ref for cs in self.pevs])
             plt.ylim(0, soc_ref_max*1.1)
+            
+        #============= 4. Sum of stations_power ===============
+        if 4 in plots:
+            n_plots = self.plot_ax(plots, n_plots, timesteps=True)
+            area_P = self.hist['area_P'][:self.timestep]
+            plt.plot(timesteps, [self.area.P_ref for _ in timesteps])
+            plt.plot(timesteps[:self.timestep], area_P)
+            plt.ylim(-2, self.area.P_ref*1.1 )
         
             
             

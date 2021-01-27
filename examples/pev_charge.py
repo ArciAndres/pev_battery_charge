@@ -128,12 +128,14 @@ for _ in range(env.total_timesteps-1):
     plt.xticks(ind2, EVnames)
     plt.ylim(0, 26) 
     
+    # Plot sum of the stations' power
+    
     plt.subplot(4,1,4)
     
-    area_P = [(t, env.hist['area_P'][t]) for t in range(env.timestep)]
+    area_P = env.hist['area_P'][:env.timestep]
     
     plt.plot(timesteps, [env.area.P_ref for _ in timesteps])
-    plt.plot(*zip(*area_P))
+    plt.plot(timesteps[:env.timestep], area_P)
     plt.ylim(-2, env.area.P_ref*1.1 )
     plt.xlim(0,env.total_timesteps)
     plt.grid(True)
@@ -145,14 +147,14 @@ for _ in range(env.total_timesteps-1):
 # Make an analysis of high number of stations. 
 
 #%%
-obs = env.reset()
+#obs = env.reset()
 #for _ in range(env.total_timesteps-1):
 #sleep(0.01)
 actions = [space.sample()*0.2 for space in env.action_space]
 
-#set_trace()
+set_trace()
 obs, rewards, done, info, [] =  env.step(actions)
-env.render(plots=[1,2,3])
+env.render(plots=[1,2,3,4])
 #%%
 #set_trace()
 env.reset()
