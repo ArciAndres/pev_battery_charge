@@ -467,6 +467,8 @@ class PEVChargeBase(gym.Env):
         n_plots = 0
         timesteps = [i for i in range(self.total_timesteps)]
         
+        pev_index, pev_names = zip(*[(n, 'EV'+str(n)) for n in range(self.n_pevs)])
+        
         #================ 1. Current power bars ===================
         if 1 in plots:
             ind = [n for n in range(self.num_agents)]
@@ -484,3 +486,20 @@ class PEVChargeBase(gym.Env):
             
                 xticks.append(xtick)
             plt.xticks(ind, xticks)
+            
+        #============ 2. Gannt-like diagram ===================
+        if 2 in plots:
+            n_plots = self.plot_ax(plots, n_plots)
+            for pev in self.pevs:
+                plt.broken_barh([(pev.t_start, pev.t_end - pev.t_start)], (pev.id-0.25,0.5))
+            
+            plt.axvline(x=self.timestep, color='y')
+            plt.yticks(pev_index, pev_names)
+            plt.ylim(-2,self.n_pevs+1)
+            plt.xlim(0,self.total_timesteps)
+            
+            
+            
+            
+            
+            

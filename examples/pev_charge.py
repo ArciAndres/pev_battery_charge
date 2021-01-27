@@ -99,13 +99,11 @@ for _ in range(env.total_timesteps-1):
     
     # Plot Gannt-like diagram
     plt.subplot(4,1,2)
-    pev = env.pevs[0]
+    
     timesteps = [i for i in range(env.total_timesteps)]
     ind2 = [n for n in range(env.n_pevs)]
     EVnames = ['EV%d'%i for i in range(env.n_pevs)]
-    
-    barsX = [(pev.t_start, pev.t_end - pev.t_start) for pev in env.pevs]
-    barsY = [(i,0.5) for i in range(env.n_pevs)]
+
     for pev in env.pevs:
         plt.broken_barh([(pev.t_start, pev.t_end - pev.t_start)], (pev.id-0.25,0.5))
     
@@ -154,7 +152,7 @@ actions = [space.sample()*0.2 for space in env.action_space]
 
 #set_trace()
 obs, rewards, done, info, [] =  env.step(actions)
-env.render(plots=[1])
+env.render(plots=[1,2])
 #%%
 #set_trace()
 env.reset()
