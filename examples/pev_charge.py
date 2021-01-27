@@ -152,7 +152,7 @@ actions = [space.sample()*0.2 for space in env.action_space]
 
 #set_trace()
 obs, rewards, done, info, [] =  env.step(actions)
-env.render(plots=[1,2])
+env.render(plots=[1,2,3])
 #%%
 #set_trace()
 env.reset()

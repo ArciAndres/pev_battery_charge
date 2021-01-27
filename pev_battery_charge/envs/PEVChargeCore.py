@@ -498,6 +498,20 @@ class PEVChargeBase(gym.Env):
             plt.ylim(-2,self.n_pevs+1)
             plt.xlim(0,self.total_timesteps)
             
+        #======= 3. SOC vehicles (Battery state) ==============
+        if 3 in plots:
+            n_plots = self.plot_ax(plots, n_plots)
+            socs = [pev.soc for pev in self.pevs]
+            soc_left = [pev.soc_ref - pev.soc for pev in self.pevs]
+            
+            plt.bar(pev_index, socs, width=0.35, color='g' )
+            plt.bar(pev_index, soc_left, width=0.35, bottom=socs, color='pink')
+            plt.plot()
+            plt.xticks(pev_index, pev_names)
+            soc_ref_max = max([pev.soc_ref for cs in self.pevs])
+            plt.ylim(0, soc_ref_max*1.1)
+        
+            
             
             
             
