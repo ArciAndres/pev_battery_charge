@@ -26,7 +26,7 @@ class PEVBatteryCharge(PEVChargeBase):
         self.xi = args.xi
         self.P_max = args.P_max
         self.P_min = args.P_min
-        self.P_ref = args.P_min
+        self.P_ref = args.P_ref
         self.seed = args.seed
         self.rew_weights = args.reward_weights
         self.actions_last = [[0] for _ in range(self.num_agents)]
