@@ -160,7 +160,8 @@ class PEVChargeBase(gym.Env):
         for cs, action in zip(self.charge_stations, actions):
             cs.p = action
             pev_id = self.cs_schedule[self.timestep][cs.id]
-            self.pevs[pev_id].SOC_update(cs.p, self.sampling_time)
+            if pev_id != -1:
+                self.pevs[pev_id].SOC_update(cs.p, self.sampling_time)
             
             P += cs.p
         
