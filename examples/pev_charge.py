@@ -67,7 +67,7 @@ for _ in range(env.total_timesteps-1):
     ind = [n for n in range(env.num_agents)]
     
     
-    plt.subplot(3,1,1)
+    plt.subplot(4,1,1)
     p1 = plt.bar(ind, actions_last, width=0.35, )
     
     plt.ylim(0,1)
@@ -85,7 +85,7 @@ for _ in range(env.total_timesteps-1):
     
     
     # Plot Gannt-like diagram
-    plt.subplot(3,1,2)
+    plt.subplot(4,1,2)
     pev = env.pevs[0]
     timesteps = [i for i in range(env.total_timesteps)]
     ind2 = [n for n in range(env.n_pevs)]
@@ -105,7 +105,7 @@ for _ in range(env.total_timesteps-1):
 
     # Plot state of charge of the vehicles. 
 
-    plt.subplot(3,1,3)
+    plt.subplot(4,1,3)
     
     ind2 = [n for n in range(env.n_pevs)]
     socs = [pev.soc for pev in env.pevs]
@@ -116,7 +116,21 @@ for _ in range(env.total_timesteps-1):
     plt.plot()
     plt.xticks(ind2, EVnames)
     plt.ylim(0, 26) 
+    
+    plt.subplot(4,1,4)
+    
+    area_P = [(t, env.hist['area_P'][t]) for t in range(env.timestep)]
+    
+    plt.plot(timesteps, [env.area.P_ref for _ in timesteps])
+    plt.plot(*zip(*area_P))
+    plt.ylim(-2, env.area.P_ref*1.1 )
+    plt.xlim(0,env.total_timesteps)
+    plt.grid(True)
+    
     plt.show()
+
+    
+    
 # plt.legend((p1[0], p2[0]), ('Men', 'Women'))
 
 # Make an analysis of high number of stations. 

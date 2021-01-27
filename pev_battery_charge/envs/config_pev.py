@@ -33,6 +33,7 @@ def get_config(notebook=False):
     parser.add_argument("--xi", type=float, default=0.1, help='PEV conversion losses.')
     parser.add_argument("--P_min", type=float, default=0, help='Minimum power supply capacity by load area.')
     parser.add_argument("--P_max", type=float, default=200, help='Maximum power supply capacity by load area.')
+    parser.add_argument("--P_ref", type=float, default=31.5, help="Referece power supply bound by load area. Sum of stations' powers should not exceed this value.")
     parser.add_argument("--sampling_time", type=int, default=5, help='Sampling time (Delta_t).')
     parser.add_argument("--total_time", type=int, default=960, help='Total time (minutes) of the simulation.')
     ### Parameters of random load distribution

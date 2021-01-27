@@ -26,6 +26,7 @@ class PEVBatteryCharge(PEVChargeBase):
         self.xi = args.xi
         self.P_max = args.P_max
         self.P_min = args.P_min
+        self.P_ref = args.P_min
         self.seed = args.seed
         self.rew_weights = args.reward_weights
         self.actions_last = [[0] for _ in range(self.num_agents)]
@@ -40,7 +41,7 @@ class PEVBatteryCharge(PEVChargeBase):
                                   p_min=self.p_min, 
                                   p_max=self.p_max) for i in range(self.num_agents)]
         
-        self.area = LoadArea(P_max=self.P_max, P_min=self.P_min, 
+        self.area = LoadArea(P_max=self.P_max, P_min=self.P_min, P_ref=self.P_ref, 
                              charge_stations=charge_stations, 
                              pevs=pevs)
         
@@ -79,7 +80,7 @@ class PEVBatteryCharge(PEVChargeBase):
                     rew[1] = (-1)
                 
                 # Penalization surpassing global limit
-                if self.area.P > self.area.P_max or self.area.P < self.area.P_min:
+                if self.area.P > self.area.P_ref or self.area.P < self.area.P_min:
                     rew[2] = (-1)
             
             reward = np.array(rew)*self.rew_weights
@@ -104,18 +105,17 @@ class PEVBatteryCharge(PEVChargeBase):
         for cs in self.charge_stations:
             pev = self.pevs[cs.pev_id]
             soc_remain = pev.soc - pev.soc_ref
-            timesteps_remaining = pev.t_end - self.timestep
+            #timesteps_remaining = pev.t_end - self.timestep
             observations.append([cs.p_min, 
                                  cs.p_max,
-                                 self.area.P_max,
+                                 self.area.P_ref,
                                  cs.plugged, 
                                  soc_remain,
-                                 timesteps_remaining, 
+                                 #timesteps_remaining, 
                                  self.area.P,
                                  self.actions_last[cs.id][0]])
         
         return observations
-        
         
     def _computeInfo(self):
         #raise NotImplementedError()

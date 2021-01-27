@@ -73,7 +73,7 @@ class ChargeStation():
     p_min : float
         Minimum power value (kW) to be delivered PEV.
     p_max : float
-        Maximum power value (kW) to be delivered to the PEV.
+        Maximum power value (kW) capacity in the stations.
     plugged : bool
         Indicates if the charge station has a PEV plugged-in or it is free. 
     soc_left : float
@@ -97,16 +97,29 @@ class ChargeStation():
         self.pev_id = -1 # No PEV assigned 
         
 class LoadArea():
-    """ Load Area simulation. It handles the operations of the charging stations"""
+    """ Load Area simulation. It handles the operations of the charging stations
+    Parameters
+    ----------
+    P_max: float
+        Maximum power value (kW) capacity in the area. 
+    P_min: float
+        Minimum power value (kW) capacity in the area.     
+    P_ref : float
+        Referece power value (kW) bound. The sum of the stations' power supply
+        should not exceed this value. 
+    
+    """
     
     def __init__(self, 
                  P_max,
                  P_min,
+                 P_ref,
                  charge_stations,
                  pevs):
         
         self.P_max = P_max
         self.P_min = P_min
+        self.P_ref = P_ref
         self.charge_stations = charge_stations
         self.pevs = pevs
         self.P = 0        
@@ -153,8 +166,8 @@ class PEVChargeBase(gym.Env):
         """
         # Apply load to the cars PEV. Update SOC. 
         
-        self.actions_last = actions        
         actions = self._preprocessAction(actions)
+        self.actions_last = actions
         
         P = 0 # Total Power of the load area
         for cs, action in zip(self.charge_stations, actions):
@@ -173,24 +186,30 @@ class PEVChargeBase(gym.Env):
         self.info = self._computeInfo()
         self.done = self._computeDone()
         
+        self.update_history()
         self.schedule_step() # Plugs or unplugs vehicles depending on t
         self.timestep += 1
         
         return self.obs, self.reward, self.done, self.info, []
         
     def schedule_step(self):
-        """ Synchronize the schedule with the values in the Charging Stations """
+        """ Synchronize the schedule with the values in the charging stations """
         
         for cs in self.charge_stations:
             cs.pev_id = self.cs_schedule[self.timestep][cs.id]
             cs.plugged = cs.pev_id != -1
 
-    
+    def update_history(self):
+        self.hist['area_P'][self.timestep] = self.area.P
+        
     def reset(self):
         self.timestep = 0
         self.build_random_schedule()
         self.compute_pev_plugin()
+        self.schedule_step()
         self.obs = self._computeObservation()
+        self.hist = {'area_P' : [0]*self.total_timesteps}
+        
         
         return self.obs, []
     
