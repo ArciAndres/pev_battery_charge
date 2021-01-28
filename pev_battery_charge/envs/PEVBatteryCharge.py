@@ -59,7 +59,7 @@ class PEVBatteryCharge(PEVChargeBase):
             if not cs.plugged:
                actions[i][0] = 0 
         
-        return [action[0] for action in actions]
+        return [action[0]*10 for action in actions]
     
     def _computeReward(self):
         """ Reward has multiple weights and penalizations. """
@@ -90,6 +90,7 @@ class PEVBatteryCharge(PEVChargeBase):
             rewards.append(sum(reward))
         
         
+        self.info_rewards_sum = rewards
         rewards = [[r] for r in rewards] ## Added to match the array size in training
         return rewards
     
@@ -124,7 +125,9 @@ class PEVBatteryCharge(PEVChargeBase):
         
     def _computeInfo(self):
         #raise NotImplementedError()
-        return {"timestep: ": self.timestep, "rewards_info": self.info_rewards}
+        return {"timestep: ": self.timestep, 
+                "rewards_info": self.info_rewards, 
+                "rewards_info_sum": self.info_rewards_sum}
     
     def _computeDone(self):
         #raise NotImplementedError()

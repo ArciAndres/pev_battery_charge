@@ -151,17 +151,17 @@ for _ in range(env.total_timesteps-1):
 #%%
 obs_titles = ['p_min', 'p_max', 'P_ref', 'plugged', 'soc_remain', 'P_available', 'last_action']
 #set_trace()
-obs, _ = env.reset()
+#obs, _ = env.reset()
 images = []
 # #for _ in range(env.total_timesteps-1):
 #set_trace()
-for t in range(env.total_timesteps-1):
-    #sleep(0.1)
-    actions = [space.sample()*10 for space in env.action_space]
+#for t in range(env.total_timesteps-1):
+#sleep(0.1)
+actions = [space.sample()*10 for space in env.action_space]
 
-    obs, rewards, done, info, [] =  env.step(actions)
-    #print(pd.DataFrame(obs, columns=obs_titles))
-    env.render(plots=[1,2,3,4,5])
+obs, rewards, done, info, [] =  env.step(actions)
+#print(pd.DataFrame(obs, columns=obs_titles))
+env.render(plots=[1,2,3,4,5])
     #image = env.render(plots=[1,2,3,4,5], mode='rgb_array')
     #images.append(image)
     #print(t)

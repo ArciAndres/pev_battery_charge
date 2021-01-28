@@ -100,7 +100,7 @@ def get_config(notebook=False):
     parser.add_argument("--use-linear-lr-decay", action='store_true', default=False, help='use a linear schedule on the learning rate')
     
     # save
-    parser.add_argument("--save_interval", type=int, default=150)
+    parser.add_argument("--save_interval", type=int, default=5)
     
     # log in tb
     parser.add_argument("--log_interval", type=int, default=5)    
