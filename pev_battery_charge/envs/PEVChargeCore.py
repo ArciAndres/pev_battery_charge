@@ -536,14 +536,12 @@ class PEVChargeBase(gym.Env):
             plt.plot(timesteps, [self.soc_max for _ in timesteps])
             
             for pev in self.pevs:
-                t0 = int(pev.t_start), 
-                t1 = int(pev.t_end) if pev.t_end > self.timestep else self.timestep
+                t0 = int(pev.t_start) 
+                t1 = int(pev.t_end) if pev.t_end < self.timestep else self.timestep
                 
                 if self.timestep >= t0 :
-                    from pdb import set_trace
-                    #set_trace()
-                    x = [t for t in range(t0, self.timestep, 1)]
-                    pev_soc = self.hist['pevs_soc'][pev.id][t0:self.timestep]
+                    x = [t for t in range(t0, t1, 1)]
+                    pev_soc = self.hist['pevs_soc'][pev.id][t0:t1]
                     plt.plot(x, pev_soc)
                 else:
                     continue

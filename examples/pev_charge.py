@@ -150,7 +150,7 @@ for _ in range(env.total_timesteps-1):
 
 #%%
 obs_titles = ['p_min', 'p_max', 'P_ref', 'plugged', 'soc_remain', 'P_available', 'last_action']
-set_trace()
+#set_trace()
 obs, _ = env.reset()
 images = []
 # #for _ in range(env.total_timesteps-1):

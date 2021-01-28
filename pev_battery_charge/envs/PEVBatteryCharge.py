@@ -82,8 +82,6 @@ class PEVBatteryCharge(PEVChargeBase):
                 # Penalization surpassing global limit
                 if self.area.P > self.area.P_ref or self.area.P < self.area.P_min:
                     rew[2] = (-1)
-            from pdb import set_trace
-            set_trace()
             
             reward = np.array(rew)*self.rew_weights
             
