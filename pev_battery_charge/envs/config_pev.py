@@ -12,13 +12,13 @@ def get_config(notebook=False):
     parser.add_argument("--cuda", action='store_false', default=True)
     parser.add_argument("--cuda_deterministic", action='store_false', default=True)
     parser.add_argument("--n_training_threads", type=int, default=12)
-    parser.add_argument("--n_rollout_threads", type=int, default=2)
+    parser.add_argument("--n_rollout_threads", type=int, default=1)
     parser.add_argument("--num_env_steps", type=int, default=10e6, help='number of environment steps to train (default: 10e6)') 
     
     # env
     parser.add_argument("--env_name", type=str, default='BatteryCharge')
     parser.add_argument("--scenario_name", type=str, default='PEVChargeSchedule')
-    parser.add_argument("--num_agents", type=int, default=3, help='Number of charging stations to control.')
+    parser.add_argument("--num_agents", type=int, default=6, help='Number of charging stations to control.')
     parser.add_argument("--share_reward", action='store_false', default=False)
     
     # PEV Charge Environment
@@ -35,13 +35,13 @@ def get_config(notebook=False):
     parser.add_argument("--P_max", type=float, default=200, help='Maximum power supply capacity by load area.')
     parser.add_argument("--P_ref", type=float, default=31.5, help="Referece power supply bound by load area. Sum of stations' powers should not exceed this value.")
     parser.add_argument("--sampling_time", type=int, default=5, help='Sampling time (Delta_t).')
-    parser.add_argument("--total_time", type=int, default=960, help='Total time (minutes) of the simulation.')
+    parser.add_argument("--total_time", type=int, default=480, help='Total time (minutes) of the simulation.')
     ### Parameters of random load distribution
     parser.add_argument("--initial_charge_max", type=float, default=0.5, help='Maximum percentage of value to start charge wrt. soc_max.')
     parser.add_argument("--charge_duration_tolerance", type=float, default=0.2, help='Tolerance on the maximum duration of the charge value.')
     parser.add_argument("--random_start_coeff", type=float, default=1, help='To randomize the start time, from a point between it and the next random_start_coeff elements.')
     # reward weights. Pass as (example): -rw 1 1 0.5 1 3
-    parser.add_argument("-rw", "--reward_weights", nargs=3, default=[1,1,1], \
+    parser.add_argument("-rw", "--reward_weights", nargs=3, default=[1,2,2], \
     help='Weights for reward components. 0: Penalize on remaining SOC. 1: Surpassing local limit. 2: Surpassing global limit.')
     
     
@@ -94,7 +94,7 @@ def get_config(notebook=False):
     parser.add_argument("--huber_delta", type=float, default=10.0)   
     
     # replay buffer
-    parser.add_argument("--episode_length", type=int, default=190, help='number of forward steps in A2C (default: 5)')
+    parser.add_argument("--episode_length", type=int, default=95, help='number of forward steps in A2C (default: 5)')
 
     # run
     parser.add_argument("--use-linear-lr-decay", action='store_true', default=False, help='use a linear schedule on the learning rate')
@@ -113,7 +113,7 @@ def get_config(notebook=False):
     parser.add_argument("--eval_episodes", type=int, default=32)
     
     # render
-    parser.add_argument("--save_gifs", action='store_true', default=False)
+    parser.add_argument("--save_gifs", action='store_true', default=True)
     parser.add_argument("--save_gifs_interval", type=int, default=200)
 
     parser.add_argument("--ifi", type=float, default=0.333333)

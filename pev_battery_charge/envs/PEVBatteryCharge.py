@@ -28,8 +28,8 @@ class PEVBatteryCharge(PEVChargeBase):
         self.P_min = args.P_min
         self.P_ref = args.P_ref
         self.seed = args.seed
-        self.rew_weights = args.reward_weights
-        self.actions_last = [[0] for _ in range(self.num_agents)]
+        self.rew_weights = [int(r) for r in args.reward_weights]
+        self.actions_last = [0 for _ in range(self.num_agents)]
         
         pevs = [PEV( ID=i,
                      soc_max=self.soc_max,
@@ -82,6 +82,8 @@ class PEVBatteryCharge(PEVChargeBase):
                 # Penalization surpassing global limit
                 if self.area.P > self.area.P_ref or self.area.P < self.area.P_min:
                     rew[2] = (-1)
+            from pdb import set_trace
+            set_trace()
             
             reward = np.array(rew)*self.rew_weights
             
