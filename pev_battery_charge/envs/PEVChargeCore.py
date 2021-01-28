@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 from numpy.random import random
 from pev_battery_charge.utils.utils import createDict
 import gym
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
 #from ray.rllib.env.multi_agent_env import MultiAgentEnv
 
 
@@ -521,6 +523,15 @@ class PEVChargeBase(gym.Env):
             plt.plot(timesteps[:self.timestep], area_P)
             plt.ylim(-2, self.area.P_ref*1.2 )
         
+        if mode == 'rgb_array':
+            fig = plt.gcf()
+            #width, height = fig.get_size_inches() * fig.get_dpi()
+            canvas = FigureCanvas(fig)
+            canvas.draw()
+            s, (width, height) = canvas.print_to_buffer()
+            
+            image = np.frombuffer(s, dtype='uint8').reshape(int(height), int(width), 4)
+            return image
         plt.show()
             
             
