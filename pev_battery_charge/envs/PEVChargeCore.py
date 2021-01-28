@@ -204,22 +204,29 @@ class PEVChargeBase(gym.Env):
             cs.pev_id = self.cs_schedule[self.timestep][cs.id]
             cs.plugged = cs.pev_id != -1
 
-    def update_history(self):
-        self.hist['area_P'][self.timestep] = self.area.P
-        self.hist['actions'][self.timestep] = self.actions_last
-        
     def reset(self):
         self.timestep = 0
         self.build_random_schedule()
         self.compute_pev_plugin()
         self.schedule_step()
         self.obs = self._computeObservation()
+
         self.hist = {'area_P' : [0]*self.total_timesteps, 
-                     'actions' : [0]*self.total_timesteps}
+                     'actions' : [0]*self.total_timesteps,
+                     'CS_p' : [0]*self.total_timesteps,
+                     'pevs_soc' : [[0]*self.total_timesteps for _ in range(self.n_pevs)]}
         
         
         return self.obs, []
     
+    def update_history(self):
+        self.hist['area_P'][self.timestep] = self.area.P        
+        self.hist['CS_p'][self.timestep] = [cs.p for cs in self.charge_stations]
+        self.hist['actions'][self.timestep] = self.actions_last
+        
+        for pev in self.pevs:
+            self.hist['pevs_soc'][pev.id][self.timestep] = pev.soc
+            
     def set_seed(self, seed):
         self.seed = seed
         if self.seed is None:
@@ -523,6 +530,29 @@ class PEVChargeBase(gym.Env):
             plt.plot(timesteps[:self.timestep], area_P)
             plt.ylim(-2, self.area.P_ref*1.2 )
         
+        #===== 5. SOC vehicles (Battery state) revisited ======
+        if 5 in plots:
+            n_plots = self.plot_ax(plots, n_plots, timesteps=True)
+            plt.plot(timesteps, [self.soc_max for _ in timesteps])
+            
+            for pev in self.pevs:
+                t0, t1 = int(pev.t_start), int(pev.t_end)
+                
+                if self.timestep >= t0 :
+                    from pdb import set_trace
+                    #set_trace()
+                    x = [t for t in range(t0, self.timestep, 1)]
+                    pev_soc = self.hist['pevs_soc'][pev.id][t0:self.timestep]
+                    plt.plot(x, pev_soc)
+                else:
+                    continue
+            
+            plt.ylim(-2, self.soc_max*1.2 )
+            
+            
+        #==============================================================
+        #==============================================================
+        #==============================================================
         if mode == 'rgb_array':
             fig = plt.gcf()
             #width, height = fig.get_size_inches() * fig.get_dpi()
