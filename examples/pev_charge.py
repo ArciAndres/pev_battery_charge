@@ -12,6 +12,7 @@ from pdb import set_trace
 from pev_battery_charge.envs.config_pev import get_config
 from matplotlib import pyplot as plt
 from time import sleep
+import pandas as pd
 config = get_config(notebook=True)
 config.num_agents = 6
 config.n_pevs = 20
@@ -147,14 +148,18 @@ for _ in range(env.total_timesteps-1):
 # Make an analysis of high number of stations. 
 
 #%%
-#obs = env.reset()
-#for _ in range(env.total_timesteps-1):
-#sleep(0.01)
-actions = [space.sample()*0.2 for space in env.action_space]
-
-set_trace()
-obs, rewards, done, info, [] =  env.step(actions)
-env.render(plots=[1,2,3,4])
+obs_titles = ['p_min', 'p_max', 'P_ref', 'plugged', 'soc_remain', 'P_available', 'last_action']
+obs = env.reset()
+# #for _ in range(env.total_timesteps-1):
+for _ in range(env.total_timesteps-1):
+    actions = [space.sample()*10 for space in env.action_space]
+    
+    set_trace()
+    obs, rewards, done, info, [] =  env.step(actions)
+    print(pd.DataFrame(obs, columns=obs_titles))
+    env.render(plots=[1,2,3,4])
+    print(pd.DataFrame(info['rewards_info']))
+    sleep(10)
 #%%
 #set_trace()
 env.reset()

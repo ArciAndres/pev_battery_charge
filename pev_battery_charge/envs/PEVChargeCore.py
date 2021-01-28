@@ -479,7 +479,7 @@ class PEVChargeBase(gym.Env):
             plt.bar(ind, self.actions_last, width=0.35)
             plug_pevs = self.cs_schedule[self.timestep]
             
-            plt.ylim(0,1)
+            plt.ylim(0,self.p_max*1.1) # Maximum available power of charging stations
             # Configure the name of the ticks in X
             xticks = []
             for i in range(self.num_agents):
@@ -519,9 +519,9 @@ class PEVChargeBase(gym.Env):
             area_P = self.hist['area_P'][:self.timestep]
             plt.plot(timesteps, [self.area.P_ref for _ in timesteps])
             plt.plot(timesteps[:self.timestep], area_P)
-            plt.ylim(-2, self.area.P_ref*1.1 )
+            plt.ylim(-2, self.area.P_ref*1.2 )
         
-            
+        plt.show()
             
             
             

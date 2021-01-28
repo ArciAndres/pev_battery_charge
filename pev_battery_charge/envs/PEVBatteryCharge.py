@@ -65,14 +65,14 @@ class PEVBatteryCharge(PEVChargeBase):
         """ Reward has multiple weights and penalizations. """
         
         rewards = []
-        
+        self.info_rewards = []
         for cs in self.charge_stations:
             rew = [0]*len(self.rew_weights)
             if cs.plugged:
                 pev = self.pevs[cs.pev_id]
                 
                 # Penalization on remaining SOC
-                soc_remain = pev.soc - pev.soc_ref
+                soc_remain = -(pev.soc_ref - pev.soc)
                 rew[0] = soc_remain/self.soc_ref # Normalized on the reference, not max
                 
                 # Penalization surpassing local limit
@@ -84,10 +84,11 @@ class PEVBatteryCharge(PEVChargeBase):
                     rew[2] = (-1)
             
             reward = np.array(rew)*self.rew_weights
-            rew = sum(rewards)
-            self.info_rewards = { ("rew%d"%i) : rewards[i] for i in range(len(rewards)) }
+            
+            self.info_rewards.append(reward)
         
-            rewards.append(sum(reward))  
+            rewards.append(sum(reward))
+        
         
         rewards = [[r] for r in rewards] ## Added to match the array size in training
         return rewards
@@ -103,8 +104,12 @@ class PEVBatteryCharge(PEVChargeBase):
         observations = []
                 
         for cs in self.charge_stations:
-            pev = self.pevs[cs.pev_id]
-            soc_remain = pev.soc - pev.soc_ref
+            if cs.plugged:
+                pev = self.pevs[cs.pev_id]
+                soc_remain = pev.soc_ref - pev.soc
+            else:
+                soc_remain = -1
+                
             #timesteps_remaining = pev.t_end - self.timestep
             observations.append([cs.p_min, 
                                  cs.p_max,
@@ -112,14 +117,14 @@ class PEVBatteryCharge(PEVChargeBase):
                                  cs.plugged, 
                                  soc_remain,
                                  #timesteps_remaining, 
-                                 self.area.P,
+                                 self.area.P_ref - self.area.P,
                                  self.actions_last[cs.id]])
         
         return observations
         
     def _computeInfo(self):
         #raise NotImplementedError()
-        return {"timestep: ": self.timestep}
+        return {"timestep: ": self.timestep, "rewards_info": self.info_rewards}
     
     def _computeDone(self):
         #raise NotImplementedError()
