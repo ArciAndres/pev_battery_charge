@@ -115,6 +115,7 @@ def get_config(notebook=False):
     # render
     parser.add_argument("--save_gifs", action='store_true', default=True)
     parser.add_argument("--save_gifs_interval", type=int, default=200)
+    parser.add_argument("--parallel_gif", action='store_true')
 
     parser.add_argument("--ifi", type=float, default=0.333333)
     parser.add_argument("--model_dir", type=str, default=None)
