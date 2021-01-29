@@ -195,6 +195,9 @@ class PEVChargeBase(gym.Env):
         self.schedule_step() # Plugs or unplugs vehicles depending on t
         self.timestep += 1
         
+        if self.timestep == self.total_timesteps:
+            self.reset()
+        
         return self.obs, self.reward, self.done, self.info, []
         
     def schedule_step(self):
