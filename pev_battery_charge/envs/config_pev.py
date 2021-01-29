@@ -12,7 +12,7 @@ def get_config(notebook=False):
     parser.add_argument("--cuda", action='store_false', default=True)
     parser.add_argument("--cuda_deterministic", action='store_false', default=True)
     parser.add_argument("--n_training_threads", type=int, default=12)
-    parser.add_argument("--n_rollout_threads", type=int, default=1)
+    parser.add_argument("--n_rollout_threads", type=int, default=2)
     parser.add_argument("--num_env_steps", type=int, default=10e6, help='number of environment steps to train (default: 10e6)') 
     
     # env
@@ -35,7 +35,7 @@ def get_config(notebook=False):
     parser.add_argument("--P_max", type=float, default=200, help='Maximum power supply capacity by load area.')
     parser.add_argument("--P_ref", type=float, default=31.5, help="Referece power supply bound by load area. Sum of stations' powers should not exceed this value.")
     parser.add_argument("--sampling_time", type=int, default=5, help='Sampling time (Delta_t).')
-    parser.add_argument("--total_time", type=int, default=480, help='Total time (minutes) of the simulation.')
+    parser.add_argument("--total_time", type=int, default=240, help='Total time (minutes) of the simulation.')
     ### Parameters of random load distribution
     parser.add_argument("--initial_charge_max", type=float, default=0.5, help='Maximum percentage of value to start charge wrt. soc_max.')
     parser.add_argument("--charge_duration_tolerance", type=float, default=0.2, help='Tolerance on the maximum duration of the charge value.')
