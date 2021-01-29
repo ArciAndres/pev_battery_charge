@@ -12,7 +12,7 @@ def get_config(notebook=False):
     parser.add_argument("--cuda", action='store_false', default=True)
     parser.add_argument("--cuda_deterministic", action='store_false', default=True)
     parser.add_argument("--n_training_threads", type=int, default=12)
-    parser.add_argument("--n_rollout_threads", type=int, default=2)
+    parser.add_argument("--n_rollout_threads", type=int, default=1)
     parser.add_argument("--num_env_steps", type=int, default=10e6, help='number of environment steps to train (default: 10e6)') 
     
     # env
@@ -93,8 +93,8 @@ def get_config(notebook=False):
     parser.add_argument("--use_value_high_masks", action='store_false', default=True)
     parser.add_argument("--huber_delta", type=float, default=10.0)   
     
-    # replay buffer
-    parser.add_argument("--episode_length", type=int, default=95, help='number of forward steps in A2C (default: 5)')
+    # # replay buffer
+    # parser.add_argument("--episode_length", type=int, default=95, help='number of forward steps in A2C (default: 5)')
 
     # run
     parser.add_argument("--use-linear-lr-decay", action='store_true', default=False, help='use a linear schedule on the learning rate')
@@ -113,7 +113,7 @@ def get_config(notebook=False):
     parser.add_argument("--eval_episodes", type=int, default=32)
     
     # render
-    parser.add_argument("--save_gifs", action='store_true', default=True)
+    parser.add_argument("--save_gifs", action='store_true', default=False)
     parser.add_argument("--save_gifs_interval", type=int, default=200)
     parser.add_argument("--parallel_gif", action='store_true')
 

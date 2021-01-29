@@ -486,7 +486,7 @@ class PEVChargeBase(gym.Env):
             ind = [n for n in range(self.num_agents)]
             n_plots = self.plot_ax(plots, n_plots)
             plt.bar(ind, self.actions_last, width=0.35)
-            plug_pevs = self.cs_schedule[self.timestep]
+            plug_pevs = self.cs_schedule[self.timestep-1]
             
             plt.ylim(0,self.p_max*1.1) # Maximum available power of charging stations
             # Configure the name of the ticks in X
