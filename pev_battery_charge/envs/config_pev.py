@@ -23,6 +23,7 @@ def get_config(notebook=False):
     
     # PEV Charge Environment
     
+    parser.add_argument("--centralized", action='store_true', default=False, help='When true, changes the observation to include the info of all agents, intended for a centralized training. ')
     parser.add_argument("--n_pevs", type=int, default=10, help='Number of PEVs to schedule during training')
     parser.add_argument("--soc_max", type=float, default=24, help='Maximum SOC capacity by PEV.')
     parser.add_argument("--soc_ref", type=float, default=24, help='Reference SOC goal per PEV.')
