@@ -471,7 +471,8 @@ class PEVChargeBase(gym.Env):
             n_plots = self.plot_ax(plots, n_plots)
             plt.step(timesteps, self.plugged_sim)
     
-    def render(self, animation=False, plots=[], mode='human'):
+    def render(self, animation=False, plots=[1,2,3,4,5], mode='human'):
+        
         figlabel = "Simulation PEV Charge"
         if figlabel in plt.get_figlabels():    
             plt.close(figlabel)

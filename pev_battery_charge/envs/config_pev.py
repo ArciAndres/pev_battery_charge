@@ -24,13 +24,14 @@ def get_config(notebook=False):
     # PEV Charge Environment
     
     parser.add_argument("--centralized", action='store_true', default=False, help='When true, changes the observation to include the info of all agents, intended for a centralized training. ')
+    parser.add_argument("--action_weight", type=int, default=10, help='Multiplying factor to scale action values.')
     parser.add_argument("--n_pevs", type=int, default=10, help='Number of PEVs to schedule during training')
     parser.add_argument("--soc_max", type=float, default=24, help='Maximum SOC capacity by PEV.')
     parser.add_argument("--soc_ref", type=float, default=24, help='Reference SOC goal per PEV.')
     parser.add_argument("--soc_initial", type=float, default=0, help='Initial State of Charge of PEV')
     parser.add_argument("--p_min", type=float, default=0, help='Minimum power supply capacity by charging station.')
     parser.add_argument("--p_max", type=float, default=22, help='Maximum power supply capacity by charging station.')
-    parser.add_argument("-ctd", "--charge_time_desired", type=int, default=180, help='Charge Time Desired by PEV (in minutes)')
+    parser.add_argument("-ctd", "--charge_time_desired", type=int, default=90, help='Charge Time Desired by PEV (in minutes)')
     parser.add_argument("--xi", type=float, default=0.1, help='PEV conversion losses.')
     parser.add_argument("--P_min", type=float, default=0, help='Minimum power supply capacity by load area.')
     parser.add_argument("--P_max", type=float, default=200, help='Maximum power supply capacity by load area.')
