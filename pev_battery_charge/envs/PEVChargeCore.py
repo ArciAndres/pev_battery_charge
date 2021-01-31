@@ -220,7 +220,7 @@ class PEVChargeBase(gym.Env):
                      'pevs_soc' : [[0]*self.total_timesteps for _ in range(self.n_pevs)]}
         
         
-        return self.obs, []
+        return self.obs
     
     def update_history(self):
         self.hist['area_P'][self.timestep] = self.area.P        
