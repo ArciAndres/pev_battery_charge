@@ -48,3 +48,5 @@ for i in range(env.total_timesteps):
     df = pd.DataFrame([obs+[rewards]])
     print(df.to_string(header=False))
     
+    
+#%%
