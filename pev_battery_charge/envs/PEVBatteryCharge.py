@@ -130,7 +130,10 @@ class PEVBatteryCharge(PEVChargeBase):
                 "rewards_info_sum": self.info_rewards_sum}
     
     def _computeDone(self):
-        #raise NotImplementedError()
-        return [False]*self.num_agents        
+        
+        if self.timestep >= self.total_timesteps-1:
+            return [True]*self.num_agents
+        else: 
+            return [False]*self.num_agents
          
         

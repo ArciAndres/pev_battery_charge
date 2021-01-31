@@ -139,6 +139,10 @@ class PEVBatteryChargeCentral(PEVChargeBase):
     
     def _computeDone(self):
         #raise NotImplementedError()
-        return False
+        if self.timestep >= self.total_timesteps-1:
+            return True
+        else: 
+            return False
+        
          
         
