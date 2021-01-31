@@ -230,9 +230,9 @@ class PEVChargeBase(gym.Env):
         for pev in self.pevs:
             self.hist['pevs_soc'][pev.id][self.timestep] = pev.soc
             
-    def set_seed(self, seed):
-        self.seed = seed
-        if self.seed is None:
+    def seed(self, seed):
+        self.seed_ = seed
+        if self.seed_ is None:
             np.random.seed(1)
         else:
             np.random.seed(seed)
