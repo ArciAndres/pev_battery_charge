@@ -139,6 +139,6 @@ class PEVBatteryChargeCentral(PEVChargeBase):
     
     def _computeDone(self):
         #raise NotImplementedError()
-        return [False]*self.num_agents        
+        return False
          
         
