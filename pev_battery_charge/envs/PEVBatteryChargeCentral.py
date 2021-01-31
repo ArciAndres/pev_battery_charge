@@ -56,7 +56,9 @@ class PEVBatteryChargeCentral(PEVChargeBase):
         return spaces.Box(low=0, high=np.inf, shape=(self.num_agents,) , dtype=np.float32)
     
     def _observationSpace(self):
-        return [ spaces.Box(low=0, high=np.inf, shape=(7,), dtype=np.float32) for _ in range(self.num_agents)]
+        shape = 4 + self.num_agents*2 # 4 Obs_general, soc_remain (num_agents), plugs (num_agents)
+        
+        return spaces.Box(low=0, high=np.inf, shape=(shape,), dtype=np.float32)
     
     def _preprocessAction(self, actions):
         # If the charging station is not connected, the applied action will be zero
