@@ -198,7 +198,7 @@ class PEVChargeBase(gym.Env):
         if self.timestep == self.total_timesteps:
             self.reset()
         
-        return self.obs, self.reward, self.done, self.info, []
+        return self.obs, self.reward, self.done, self.info
         
     def schedule_step(self):
         """ Synchronize the schedule with the values in the charging stations """
