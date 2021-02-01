@@ -7,12 +7,12 @@ def get_config(notebook=False):
     parser = argparse.ArgumentParser(description='PEV Battery Charging multi-agent environment.')
 
     # prepare
-    parser.add_argument("--algorithm_name", type=str, default='mappo_gru')
+    parser.add_argument("--algorithm_name", type=str, default='PPO')
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--cuda", action='store_false', default=True)
     parser.add_argument("--cuda_deterministic", action='store_false', default=True)
     parser.add_argument("--n_training_threads", type=int, default=12)
-    parser.add_argument("--n_rollout_threads", type=int, default=1)
+    parser.add_argument("--n_rollout_threads", type=int, default=2)
     parser.add_argument("--num_env_steps", type=int, default=10e6, help='number of environment steps to train (default: 10e6)') 
     
     # env
@@ -23,7 +23,6 @@ def get_config(notebook=False):
     
     # PEV Charge Environment
     
-    parser.add_argument("--centralized", action='store_true', default=False, help='When true, changes the observation to include the info of all agents, intended for a centralized training. ')
     parser.add_argument("--action_weight", type=int, default=10, help='Multiplying factor to scale action values.')
     parser.add_argument("--n_pevs", type=int, default=10, help='Number of PEVs to schedule during training')
     parser.add_argument("--soc_max", type=float, default=24, help='Maximum SOC capacity by PEV.')
@@ -96,7 +95,8 @@ def get_config(notebook=False):
     parser.add_argument("--huber_delta", type=float, default=10.0)   
     
     # # replay buffer
-    # parser.add_argument("--episode_length", type=int, default=95, help='number of forward steps in A2C (default: 5)')
+    parser.add_argument("--iterations", type=int, default=10, help='Number of repetitions to pass the total_number of steps.')
+    parser.add_argument("--episode_length", type=int, default=95, help='number of forward steps in A2C (default: 5)')
 
     # run
     parser.add_argument("--use-linear-lr-decay", action='store_true', default=False, help='use a linear schedule on the learning rate')
