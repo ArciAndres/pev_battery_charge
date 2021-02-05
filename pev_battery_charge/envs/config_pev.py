@@ -22,7 +22,7 @@ def get_config(notebook=False):
     parser.add_argument("--share_reward", action='store_false', default=False)
     
     # PEV Charge Environment
-    
+    parser.add_argument("--train_random", action='store_true', help='Simplified environment where no schedule is programmed.')
     parser.add_argument("--action_weight", type=int, default=10, help='Multiplying factor to scale action values.')
     parser.add_argument("--n_pevs", type=int, default=10, help='Number of PEVs to schedule during training')
     parser.add_argument("--soc_max", type=float, default=24, help='Maximum SOC capacity by PEV.')

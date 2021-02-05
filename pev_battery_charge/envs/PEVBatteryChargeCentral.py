@@ -35,6 +35,7 @@ class PEVBatteryChargeCentral(PEVChargeBase):
         self.rew_weights = [int(r) for r in args.reward_weights]
         self.actions_last = [0 for _ in range(self.num_agents)]
         self.action_weight = 10
+        self.train_random = args.train_random
         
         pevs = [PEV( ID=i,
                      soc_max=self.soc_max,
@@ -114,7 +115,7 @@ class PEVBatteryChargeCentral(PEVChargeBase):
                 pev = self.pevs[cs.pev_id]
                 soc_remain = pev.soc_ref - pev.soc
             else:
-                soc_remain = -1
+                soc_remain = 0
             
             socs_remain.append(soc_remain)
         
