@@ -1,8 +1,8 @@
 import numpy as np
-from pev_battery_charge.envs.PEVChargeCore import PEV, ChargeStation, PEVChargeBase, LoadArea
+from pev_battery_charge.envs.PEVChargeRandom import PEV, ChargeStation, PEVChargeBase, LoadArea
 from gym import spaces
 
-class PEVBatteryChargeCentral(PEVChargeBase):
+class PEVBatteryChargeRandom(PEVChargeBase):
     '''
     Plug-in Electric Vehicle Charing environment. 
     Centralized version of the actual problem. In this setting, it is assumed
@@ -41,7 +41,7 @@ class PEVBatteryChargeCentral(PEVChargeBase):
                      soc_max=self.soc_max,
                      xi=self.xi,
                      soc=self.soc_initial, 
-                     charge_time_desired=self.charge_time_desired) for i in range(self.n_pevs)]
+                     charge_time_desired=self.charge_time_desired) for i in range(self.num_agents)]
         
         charge_stations = [ChargeStation(ID=i, 
                                   p_min=self.p_min, 

@@ -19,6 +19,12 @@ register(
     entry_point='pev_battery_charge.envs:PEVBatteryChargeCentral',
 )
 
+register(
+    id='pev-battery-charge-central-v0',
+    entry_point='pev_battery_charge.envs:PEVBatteryChargeRandom',
+)
+
+
 
 
 

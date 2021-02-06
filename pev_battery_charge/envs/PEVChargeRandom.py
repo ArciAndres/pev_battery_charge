@@ -213,6 +213,21 @@ class PEVChargeBase(gym.Env):
         
         
         return self.obs, self.reward, self.done, self.info
+        
+    def get_random_timestep_case(self):
+        
+        plugs = [np.random.choice([0,1]) for _ in range(self.num_agents)]
+        
+        socs = []
+        for plug in plugs:
+            if plug:
+                soc = round(self.soc_max*random(),3)
+            else:
+                soc = self.soc_max
+            
+            socs.append(soc)
+    
+        return plugs, socs
     
     def schedule_step(self):
         """ Synchronize the schedule with the values in the charging stations """
@@ -222,7 +237,6 @@ class PEVChargeBase(gym.Env):
             cs.plugged = cs.pev_id != -1
 
     def reset(self):
-        
         self.timestep = 0
         self.build_random_schedule()
         self.compute_pev_plugin()
