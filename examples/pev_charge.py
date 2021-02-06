@@ -18,6 +18,7 @@ config = get_config(notebook=True)
 config.num_agents = 4
 config.n_pevs = 6
 #set_trace()
+config.train_random = 6
 env = PEVBatteryCharge(args=config)
 
 # #%%
@@ -45,7 +46,7 @@ actions = [space.sample() for space in env.action_space]
 
 #set_trace()
 
-obs, rewards, info, done, _ =  env.step(actions)
+obs, rewards, info, done =  env.step(actions)
 obs
 
 #%%
@@ -56,7 +57,7 @@ for _ in range(env.total_timesteps-1):
     actions = [space.sample()*0.2 for space in env.action_space]
     
     #set_trace()
-    obs, rewards, done, info, [] =  env.step(actions)
+    obs, rewards, done, info =  env.step(actions)
     env.render()
     
 #%%

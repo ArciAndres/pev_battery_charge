@@ -177,7 +177,12 @@ class PEVChargeBase(gym.Env):
         P = 0 # Total Power of the load area
         for cs, action in zip(self.charge_stations, actions):
             cs.p = action
-            pev_id = self.cs_schedule[self.timestep][cs.id]
+            
+            if self.train_random:
+                pev_id = cs.id
+            else:    
+                pev_id = self.cs_schedule[self.timestep][cs.id]
+                
             if pev_id != -1:
                 self.pevs[pev_id].SOC_update(cs.p, self.sampling_time)
             
@@ -220,11 +225,29 @@ class PEVChargeBase(gym.Env):
             cs.pev_id = self.cs_schedule[self.timestep][cs.id]
             cs.plugged = cs.pev_id != -1
 
+    def get_random_timestep_case(self):
+        '''Generates a sample case where the optimal solution should be found'''
+        plugs = [np.random.choice([0,1]) for _ in range(self.num_agents)]
+        
+        socs = []
+        for plug in plugs:
+            if plug:
+                soc = round(self.soc_max*random(),3)
+            else:
+                soc = self.soc_max
+            
+            socs.append(soc)
+    
+        return plugs, socs
+    
     def reset(self):
         self.timestep = 0
-        self.build_random_schedule()
-        self.compute_pev_plugin()
-        self.schedule_step()
+        
+        if not self.train_random:
+            self.build_random_schedule()
+            self.compute_pev_plugin()
+            self.schedule_step()
+            
         self.obs = self._computeObservation()
 
         self.hist = {'area_P' : [0]*self.total_timesteps, 

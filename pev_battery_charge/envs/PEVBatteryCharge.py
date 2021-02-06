@@ -30,6 +30,13 @@ class PEVBatteryCharge(PEVChargeBase):
         self.seed = args.seed
         self.rew_weights = [int(r) for r in args.reward_weights]
         self.actions_last = [0 for _ in range(self.num_agents)]
+        self.action_weight = args.action_weight
+        self.train_random = args.train_random
+        
+        
+        if self.train_random:
+            # So each station will have only 1 car, and that's it. No schedule.
+            self.n_pevs = self.num_agents
         
         pevs = [PEV( ID=i,
                      soc_max=self.soc_max,
@@ -59,7 +66,7 @@ class PEVBatteryCharge(PEVChargeBase):
             if not cs.plugged:
                actions[i][0] = 0 
         
-        return [action[0]*10 for action in actions]
+        return [action[0]*self.action_weight for action in actions]
     
     def _computeReward(self):
         """ Reward has multiple weights and penalizations. """
@@ -69,7 +76,11 @@ class PEVBatteryCharge(PEVChargeBase):
         for cs in self.charge_stations:
             rew = [0]*len(self.rew_weights)
             if cs.plugged:
-                pev = self.pevs[cs.pev_id]
+                if self.train_random:
+                    # Agents and cars are correspondant. 
+                    pev = self.pevs[cs.id]
+                else:
+                    pev = self.pevs[cs.pev_id]
                 
                 # Penalization on remaining SOC
                 soc_remain = -(pev.soc_ref - pev.soc)
@@ -106,7 +117,12 @@ class PEVBatteryCharge(PEVChargeBase):
                 
         for cs in self.charge_stations:
             if cs.plugged:
-                pev = self.pevs[cs.pev_id]
+                if self.train_random:
+                    # Agents and cars are correspondant. 
+                    pev = self.pevs[cs.id]
+                else:
+                    pev = self.pevs[cs.pev_id]
+                    
                 soc_remain = pev.soc_ref - pev.soc
             else:
                 soc_remain = -1
