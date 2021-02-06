@@ -1,5 +1,5 @@
 import numpy as np
-from pev_battery_charge.envs.PEVChargeRandom import PEV, ChargeStation, PEVChargeBase, LoadArea
+from pev_battery_charge.envs.PEVChargeCoreRandom import PEV, ChargeStation, PEVChargeBase, LoadArea
 from gym import spaces
 
 class PEVBatteryChargeRandom(PEVChargeBase):
@@ -37,11 +37,15 @@ class PEVBatteryChargeRandom(PEVChargeBase):
         self.action_weight = 10
         self.train_random = args.train_random
         
+        if self.train_random:
+            # So each station will have only 1 car, and that's it. No schedule.
+            self.n_pevs = self.num_agents
+        
         pevs = [PEV( ID=i,
                      soc_max=self.soc_max,
                      xi=self.xi,
                      soc=self.soc_initial, 
-                     charge_time_desired=self.charge_time_desired) for i in range(self.num_agents)]
+                     charge_time_desired=self.charge_time_desired) for i in range(self.n_pevs)]
         
         charge_stations = [ChargeStation(ID=i, 
                                   p_min=self.p_min, 
@@ -77,8 +81,13 @@ class PEVBatteryChargeRandom(PEVChargeBase):
         for cs in self.charge_stations:
             rew = [0]*len(self.rew_weights)
             if cs.plugged:
-                pev = self.pevs[cs.pev_id]
                 
+                if self.train_random:
+                    # Agents and cars are correspondant. 
+                    pev = self.pevs[cs.id]
+                else:
+                    pev = self.pevs[cs.pev_id]
+                    
                 # Penalization on remaining SOC
                 soc_remain = -(pev.soc_ref - pev.soc)
                 rew[0] = soc_remain/self.soc_ref # Normalized on the reference, not max
@@ -106,13 +115,19 @@ class PEVBatteryChargeRandom(PEVChargeBase):
         Consider that the agents are the charging stations.
         Global information is collected, and a joint vector is returned.
         to the station is the total area power. 
-        
         """
         
         socs_remain = []
+        
         for cs in self.charge_stations:
             if cs.plugged:
-                pev = self.pevs[cs.pev_id]
+                
+                if self.train_random:
+                    # Agents and cars are correspondant. 
+                    pev = self.pevs[cs.id]
+                else:
+                    pev = self.pevs[cs.pev_id]
+                    
                 soc_remain = pev.soc_ref - pev.soc
             else:
                 soc_remain = 0
