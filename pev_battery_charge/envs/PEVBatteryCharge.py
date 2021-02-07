@@ -31,6 +31,7 @@ class PEVBatteryCharge(PEVChargeBase):
         self.actions_last = [0 for _ in range(self.num_agents)]
         self.action_weight = args.action_weight
         self.train_random = args.train_random
+        self.share_reward = args.share_reward
         
         
         if self.train_random:
@@ -90,8 +91,12 @@ class PEVBatteryCharge(PEVChargeBase):
                     rew[1] = (-1)
                 
                 # Penalization surpassing global limit
-                if self.area.P > self.area.P_ref or self.area.P < self.area.P_min:
-                    rew[2] = (-1)
+                if self.area.P > self.area.P_ref:
+                    rew[2] = -abs(self.area.P_ref - self.area.P)/self.area.P_ref
+                    
+                elif self.area.P < self.area.P_min:
+                    rew[2] = -abs(self.area.P_min - self.area.P)/self.area.P_min
+                    
             
             reward = np.array(rew)*self.rew_weights
             
@@ -101,7 +106,14 @@ class PEVBatteryCharge(PEVChargeBase):
         
         
         self.info_rewards_sum = rewards
-        rewards = [[r] for r in rewards] ## Added to match the array size in training
+        
+        if self.share_reward:
+            sum_rewards = sum(rewards)
+            rewards = [[sum_rewards]]*self.num_agents
+            
+        else:
+            rewards = [[r] for r in rewards] ## Added to match the array size in training
+                
         return rewards
     
     def _computeObservation(self):
