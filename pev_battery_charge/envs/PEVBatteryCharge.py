@@ -95,7 +95,7 @@ class PEVBatteryCharge(PEVChargeBase):
                     rew[2] = -abs(self.area.P_ref - self.area.P)/self.area.P_ref
                     
                 elif self.area.P < self.area.P_min:
-                    rew[2] = -abs(self.area.P_min - self.area.P)/self.area.P_min
+                    rew[2] = -abs(self.area.P_min - self.area.P)/self.area.P_ref
                     
             
             reward = np.array(rew)*self.rew_weights
