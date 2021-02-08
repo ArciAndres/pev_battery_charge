@@ -82,15 +82,18 @@ class PEVBatteryCharge(PEVChargeBase):
                 else:
                     pev = self.pevs[cs.pev_id]
                 
-                # Penalization on remaining SOC
+                # =============== Penalization on remaining SOC ===============
                 soc_remain = -(pev.soc_ref - pev.soc)
                 rew[0] = soc_remain/self.soc_ref # Normalized on the reference, not max
                 
-                # Penalization surpassing local limit
-                if cs.p > cs.p_max or cs.p < cs.p_min:
-                    rew[1] = (-1)
+                # =========== Penalization surpassing local limit =============
+                if cs.p > cs.p_max :
+                    rew[1] = -abs(self.cs.p_max - self.cs.p)/self.cs.p_max
                 
-                # Penalization surpassing global limit
+                elif cs.p < cs.p_min:
+                    rew[1] = -abs(self.cs.p_min - self.cs.p)/self.cs.p_max
+
+                # =========== Penalization surpassing global limit ============
                 if self.area.P > self.area.P_ref:
                     rew[2] = -abs(self.area.P_ref - self.area.P)/self.area.P_ref
                     
@@ -129,7 +132,7 @@ class PEVBatteryCharge(PEVChargeBase):
         for cs in self.charge_stations:
             if cs.plugged:
                 if self.train_random:
-                    # Agents and cars are correspondant. 
+                    # Agents and cars are correspondent. 
                     pev = self.pevs[cs.id]
                 else:
                     pev = self.pevs[cs.pev_id]
