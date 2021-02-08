@@ -88,10 +88,10 @@ class PEVBatteryCharge(PEVChargeBase):
                 
                 # =========== Penalization surpassing local limit =============
                 if cs.p > cs.p_max :
-                    rew[1] = -abs(self.cs.p_max - self.cs.p)/self.cs.p_max
+                    rew[1] = -abs(cs.p_max - cs.p)/cs.p_max
                 
                 elif cs.p < cs.p_min:
-                    rew[1] = -abs(self.cs.p_min - self.cs.p)/self.cs.p_max
+                    rew[1] = -abs(cs.p_min - cs.p)/cs.p_max
 
                 # =========== Penalization surpassing global limit ============
                 if self.area.P > self.area.P_ref:
