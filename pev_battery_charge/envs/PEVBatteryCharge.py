@@ -85,6 +85,7 @@ class PEVBatteryCharge(PEVChargeBase):
                 # =============== Penalization on remaining SOC ===============
                 soc_remain = -(pev.soc_ref - pev.soc)
                 rew[0] = soc_remain/self.soc_ref # Normalized on the reference, not max
+                rew[0] **= self.rew0_exp_factor
                 
                 # =========== Penalization surpassing local limit =============
                 if cs.p > cs.p_max :

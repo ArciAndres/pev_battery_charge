@@ -44,7 +44,7 @@ def get_config(notebook=False):
     # reward weights. Pass as (example): -rw 1 1 0.5 1 3
     parser.add_argument("-rw", "--reward_weights", nargs=3, default=[1,2,2], \
     help='Weights for reward components. 0: Penalize on remaining SOC. 1: Surpassing local limit. 2: Surpassing global limit.')
-    
+    parser.add_argument("--rew0_exp_factor", type=float, default=1, help='Weights the SOC_remaining penalty exponentially, to motivate full loading.')
     
     # network
     parser.add_argument("--share_policy", action='store_false', default=True, help='agent share the same policy')
