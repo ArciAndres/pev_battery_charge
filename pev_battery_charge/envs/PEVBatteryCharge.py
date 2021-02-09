@@ -113,7 +113,7 @@ class PEVBatteryCharge(PEVChargeBase):
         if self.share_reward:
             sum_rewards = sum(rewards)
             rewards = [[sum_rewards]]*self.num_agents
-            
+            self.info_rewards_shared = sum_rewards
         else:
             rewards = [[r] for r in rewards] ## Added to match the array size in training
                 
